@@ -1,0 +1,38 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', (p) => !p.data.draft);
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+const { post } = Astro.props;
+const { Content } = await render(post);
+const date = new Intl.DateTimeFormat('sk-SK', { day: 'numeric', month: 'long', year: 'numeric' }).format(post.data.date);
+---
+<Base title={post.data.title} description={post.data.description}>
+  <Header />
+  <main class="wrap">
+    <article>
+      <time class="label" datetime={post.data.date.toISOString()}>{date}</time>
+      <h1>{post.data.title}</h1>
+      <div class="prose"><Content /></div>
+    </article>
+    <p class="back"><a href="/blog">← Späť na blog</a></p>
+  </main>
+  <Footer />
+</Base>
+<style>
+  article { padding-top: 2rem; }
+  h1 { font-size: clamp(2.5rem, 9vw, 4rem); margin: .75rem 0 2rem; }
+  .prose { font-size: 1.1875rem; line-height: 1.75; max-width: 38rem; }
+  .prose :global(h2) { font-size: 1.9rem; margin: 2.5rem 0 .75rem; }
+  .prose :global(p), .prose :global(ul), .prose :global(ol) { margin: 0 0 1.25rem; }
+  .prose :global(blockquote) { margin: 1.5rem 0; padding-left: 1.25rem; border-left: 2px solid var(--accent); font-family: var(--serif); font-size: 1.5rem; }
+  .prose :global(code) { font-size: .9em; background: var(--line); padding: .1em .35em; border-radius: 3px; }
+  .prose :global(pre) { background: var(--line); padding: 1rem; overflow-x: auto; border-radius: 4px; }
+  .prose :global(img) { max-width: 100%; }
+  .back { margin-top: 3rem; }
+</style>

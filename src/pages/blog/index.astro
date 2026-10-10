@@ -1,0 +1,36 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+
+const fmt = new Intl.DateTimeFormat('sk-SK', { day: 'numeric', month: 'long', year: 'numeric' });
+const posts = (await getCollection('blog', (p) => !p.data.draft)).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+<Base title="Blog" description="Texty o AI, programovaní, podnikaní a komunite.">
+  <Header />
+  <main class="wrap">
+    <h1>Blog</h1>
+    <ul>
+      {posts.map((p) => (
+        <li>
+          <a href={`/blog/${p.id}`}>
+            <time datetime={p.data.date.toISOString()}>{fmt.format(p.data.date)}</time>
+            <h2>{p.data.title}</h2>
+            <p>{p.data.description}</p>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </main>
+  <Footer />
+</Base>
+<style>
+  h1 { font-size: clamp(3rem, 12vw, 5.5rem); margin: 2rem 0; }
+  ul { list-style: none; padding: 0; margin: 0; }
+  a { display: block; padding: 1.5rem 0; border-top: 1px solid var(--line); text-decoration: none; }
+  time { font-size: .8125rem; color: var(--muted); }
+  h2 { font-size: 1.9rem; margin: .25rem 0 .5rem; }
+  a:hover h2 { color: var(--accent); }
+  p { margin: 0; color: var(--muted); }
+</style>

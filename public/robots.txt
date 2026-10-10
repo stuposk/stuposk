@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://michalstupak.com/sitemap-index.xml

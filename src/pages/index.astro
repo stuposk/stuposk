@@ -1,0 +1,101 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { site, expertise, projects, timeline } from '../data/site';
+
+const fmt = new Intl.DateTimeFormat('sk-SK', { day: 'numeric', month: 'long', year: 'numeric' });
+const posts = (await getCollection('blog', (p) => !p.data.draft))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 3);
+---
+<Base>
+  <Header />
+  <main class="wrap">
+    <section class="hero">
+      <p class="label">Košice · Slovensko</p>
+      <h1>{site.name}<span class="dot">.</span></h1>
+      <p class="lead">{site.tagline}</p>
+      <p class="intro">{site.intro}</p>
+    </section>
+
+    <section>
+      <div class="sec-head"><h2>Čo robím</h2><span class="label">Odbornosti</span></div>
+      <ol class="exp">
+        {expertise.map((e, i) => (
+          <li><span class="n">0{i + 1}</span><div><h3>{e.title}</h3><p>{e.text}</p></div></li>
+        ))}
+      </ol>
+    </section>
+
+    <section id="projekty">
+      <div class="sec-head"><h2>Projekty</h2><span class="label">Kde ma nájdeš</span></div>
+      <ul class="proj">
+        {projects.map((p) => (
+          <li><a href={p.href} target="_blank" rel="noopener"><span class="pn">{p.name}</span><span class="pt">{p.text}</span><span class="arrow" aria-hidden="true">↗</span></a></li>
+        ))}
+      </ul>
+    </section>
+
+    <section id="cesta">
+      <div class="sec-head"><h2>Cesta</h2><span class="label">Život a projekty</span></div>
+      <ol class="tl">
+        {timeline.map((t) => (
+          <li class={t.kind}>
+            <span class="year">{t.year}</span>
+            <div><h3>{t.title}</h3><p>{t.text}</p></div>
+          </li>
+        ))}
+      </ol>
+      <p class="legend label"><span class="k project"></span> projekty <span class="k life"></span> život</p>
+    </section>
+
+    {posts.length > 0 && (
+      <section>
+        <div class="sec-head"><h2>Blog</h2><a class="label" href="/blog">Všetky články →</a></div>
+        <ul class="posts">
+          {posts.map((p) => (
+            <li><a href={`/blog/${p.id}`}><time datetime={p.data.date.toISOString()}>{fmt.format(p.data.date)}</time><span>{p.data.title}</span></a></li>
+          ))}
+        </ul>
+      </section>
+    )}
+  </main>
+  <Footer />
+</Base>
+
+<style>
+  .hero { padding-top: 3.5rem; }
+  h1 { font-size: clamp(3.5rem, 15vw, 7.5rem); margin: .5rem 0 1.5rem; }
+  .dot { color: var(--accent); }
+  .lead { font-family: var(--serif); font-size: clamp(1.5rem, 4.5vw, 2.25rem); line-height: 1.2; margin: 0 0 1.25rem; max-width: 30ch; }
+  .intro { color: var(--muted); max-width: 52ch; margin: 0; }
+
+  .exp, .proj, .tl, .posts { list-style: none; padding: 0; margin: 0; }
+  .exp li { display: grid; grid-template-columns: 3rem 1fr; padding: 1.25rem 0; border-bottom: 1px solid var(--line); }
+  .exp .n { color: var(--accent); font-size: .875rem; padding-top: .45rem; }
+  .exp h3, .tl h3 { font-size: 1.5rem; }
+  .exp p, .tl p { margin: .25rem 0 0; color: var(--muted); }
+
+  .proj a { display: grid; grid-template-columns: 7rem 1fr auto; gap: 1rem; align-items: baseline; padding: 1.25rem 0; border-bottom: 1px solid var(--line); text-decoration: none; }
+  .pn { font-family: var(--serif); font-size: 1.75rem; }
+  .pt { color: var(--muted); }
+  .arrow { transition: transform .2s; }
+  .proj a:hover .arrow { transform: translate(3px, -3px); }
+  @media (max-width: 32rem) { .proj a { grid-template-columns: 1fr auto; } .pt { grid-column: 1 / -1; grid-row: 2; } }
+
+  .tl { position: relative; border-left: 1px solid var(--line); margin-left: .35rem; }
+  .tl li { position: relative; display: grid; grid-template-columns: 5rem 1fr; padding: 0 0 2rem 1.75rem; }
+  .tl li::before { content: ''; position: absolute; left: -.3rem; top: .6rem; width: .6rem; height: .6rem; border-radius: 50%; background: var(--paper); border: 1.5px solid var(--muted); }
+  .tl li.project::before { background: var(--accent); border-color: var(--accent); }
+  .year { font-size: .875rem; color: var(--muted); padding-top: .5rem; }
+  .legend { display: flex; align-items: center; gap: .5rem; margin-top: .5rem; }
+  .k { width: .6rem; height: .6rem; border-radius: 50%; border: 1.5px solid var(--muted); display: inline-block; margin-left: .75rem; }
+  .k.project { background: var(--accent); border-color: var(--accent); margin-left: 0; }
+
+  .posts a { display: flex; gap: 1.5rem; padding: 1rem 0; border-bottom: 1px solid var(--line); text-decoration: none; }
+  .posts time { color: var(--muted); font-size: .875rem; min-width: 9rem; padding-top: .2rem; }
+  .posts span { font-family: var(--serif); font-size: 1.4rem; }
+  @media (max-width: 32rem) { .posts a { flex-direction: column; gap: .25rem; } }
+</style>
