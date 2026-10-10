@@ -1,13 +1,13 @@
 ---
 // Akcie pre čitateľa: stiahnuť .md, uložiť PDF, skopírovať pre AI, otvoriť v Claude / ChatGPT.
-interface Props { md: string; filename: string; title: string }
-const { md, filename, title } = Astro.props;
+interface Props { md: string; filename: string; title: string; compact?: boolean }
+const { md, filename, title, compact = false } = Astro.props;
 const mdUrl = new URL(md, Astro.site).href;
 const prompt = `Prečítaj si tento dokument „${title}“ a pomôž mi s ním ďalej pracovať: ${mdUrl}`;
 const claude = `https://claude.ai/new?q=${encodeURIComponent(prompt)}`;
 const chatgpt = `https://chatgpt.com/?q=${encodeURIComponent(prompt)}`;
 ---
-<div class="ai" data-md={md}>
+<div class:list={["ai", { compact }]} data-md={md}>
   <p class="label"><span class="only-human">Pokračuj vo svojom AI</span><span class="only-dev">// export</span></p>
   <div class="row">
     <a href={md} download={filename}>↓ .md</a>
@@ -41,5 +41,8 @@ const chatgpt = `https://chatgpt.com/?q=${encodeURIComponent(prompt)}`;
   :global([data-mode='dev']) :is(a, button) { border-radius: 4px; font-family: var(--mono); font-size: .8125rem; }
   a:hover, button:hover { border-color: var(--accent); color: var(--accent); }
   a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); }
+  .compact { margin: 0; padding: 0; border: 0; background: none; }
+  .compact .row { flex-direction: column; gap: .35rem; }
+  .compact :is(a, button) { display: block; padding: .45rem .75rem; border-radius: 8px; }
   @media print { .ai { display: none; } }
 </style>

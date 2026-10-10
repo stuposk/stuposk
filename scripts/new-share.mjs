@@ -12,6 +12,8 @@ if (existsSync(file)) throw new Error(`${file} už existuje`);
 writeFileSync(file, `---
 title: ${JSON.stringify(title)}
 ${recipient ? `recipient: ${JSON.stringify(recipient)}\n` : ''}description: ""
+status: návrh
+version: "1.0"
 date: ${new Date().toISOString().slice(0, 10)}
 ---
 

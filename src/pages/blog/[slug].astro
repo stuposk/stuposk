@@ -4,7 +4,7 @@ import Base from '../../layouts/Base.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import Prose from '../../components/Prose.astro';
-import AiActions from '../../components/AiActions.astro';
+import DocSidebar from '../../components/DocSidebar.astro';
 import { getPosts, readingTime, isoDate, humanDate } from '../../lib/content';
 
 export async function getStaticPaths() {
@@ -15,32 +15,46 @@ export async function getStaticPaths() {
   }));
 }
 const { post, newer, older } = Astro.props;
-const { Content } = await render(post);
+const { Content, headings } = await render(post);
+const minutes = readingTime(post.body);
 const md = `/blog/${post.id}.md`;
 ---
 <Base title={post.data.title} description={post.data.description} md={md}>
   <Header />
-  <main class="wrap">
+  <main class="wrap doc">
     <article>
       <p class="cmd only-dev">cat <b>blog/{post.id}.md</b></p>
       <div class="meta">
         <time datetime={post.data.date.toISOString()}><span class="only-human">{humanDate(post.data.date)}</span><span class="only-dev">{isoDate(post.data.date)}</span></time>
-        <span>· {readingTime(post.body)} min čítania</span>
+        <span>· {minutes} min čítania</span>
       </div>
       <h1>{post.data.title}</h1>
       <p class="lede">{post.data.description}</p>
+      <a class="jump no-print" href="#panel"><span class="only-human">Obsah a stiahnutie ↓</span><span class="only-dev">// toc &amp; export ↓</span></a>
       {post.data.tags.length > 0 && (
         <div class="tags no-print">{post.data.tags.map((t) => <a href={`/blog?tag=${encodeURIComponent(t)}`}>#{t}</a>)}</div>
       )}
       <Prose><Content /></Prose>
-      <AiActions md={md} filename={`${post.id}.md`} title={post.data.title} />
+      <nav class="pager no-print" aria-label="Ďalšie články">
+        {older ? <a href={`/blog/${older.id}`} class="prev"><small><span class="only-human">← Staršie</span><span class="only-dev">git checkout HEAD~1</span></small><span>{older.data.title}</span></a> : <span />}
+        {newer ? <a href={`/blog/${newer.id}`} class="next"><small><span class="only-human">Novšie →</span><span class="only-dev">git checkout HEAD@&#123;1&#125;</span></small><span>{newer.data.title}</span></a> : <span />}
+      </nav>
+      <p class="back no-print"><a href="/blog"><span class="only-human">← Všetky články</span><span class="only-dev c">cd .. ←</span></a></p>
     </article>
 
-    <nav class="pager no-print" aria-label="Ďalšie články">
-      {older ? <a href={`/blog/${older.id}`} class="prev"><small><span class="only-human">← Staršie</span><span class="only-dev">git checkout HEAD~1</span></small><span>{older.data.title}</span></a> : <span />}
-      {newer ? <a href={`/blog/${newer.id}`} class="next"><small><span class="only-human">Novšie →</span><span class="only-dev">git checkout HEAD@&#123;1&#125;</span></small><span>{newer.data.title}</span></a> : <span />}
-    </nav>
-    <p class="back no-print"><a href="/blog"><span class="only-human">← Všetky články</span><span class="only-dev c">cd .. ←</span></a></p>
+    <DocSidebar
+      metaLabel="O článku"
+      meta={[
+        { label: 'Publikované', value: isoDate(post.data.date) },
+        { label: 'Čítanie', value: `${minutes} min` },
+        ...(post.data.tags.length ? [{ label: 'Témy', links: post.data.tags.map((t) => ({ text: `#${t}`, href: `/blog?tag=${encodeURIComponent(t)}` })) }] : []),
+      ]}
+      headings={headings}
+      md={md}
+      filename={`${post.id}.md`}
+      title={post.data.title}
+    />
+
   </main>
   <Footer />
 </Base>

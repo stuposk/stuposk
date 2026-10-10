@@ -10,11 +10,13 @@ export const humanDate = (d: Date) => new Intl.DateTimeFormat('sk-SK', { day: 'n
 
 // Markdown verzia pre AI: frontmatter-free hlavička + pôvodné telo.
 export const toMarkdown = (entry: CollectionEntry<'blog'> | CollectionEntry<'pre'>, url: URL) => {
-  const d = entry.data as { title: string; description?: string; date: Date; recipient?: string };
+  const d = entry.data as { title: string; description?: string; date: Date; recipient?: string; status?: string; version?: string; validUntil?: Date };
   const meta = [
     `Autor: Michal Stupák (hello@michalstupak.com)`,
     `Dátum: ${isoDate(d.date)}`,
     d.recipient && `Pre: ${d.recipient}`,
+    d.status && `Stav: ${d.status}${d.version ? ` (v${d.version})` : ''}`,
+    d.validUntil && `Platí do: ${isoDate(d.validUntil)}`,
     `Zdroj: ${url.href}`,
   ].filter(Boolean);
   return `# ${d.title}\n\n${d.description ? `> ${d.description}\n\n` : ''}${meta.join('  \n')}\n\n---\n\n${(entry.body ?? '').trim()}\n`;

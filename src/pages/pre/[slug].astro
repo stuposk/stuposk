@@ -4,30 +4,32 @@ import Base from '../../layouts/Base.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import Prose from '../../components/Prose.astro';
-import AiActions from '../../components/AiActions.astro';
+import DocSidebar from '../../components/DocSidebar.astro';
 import { humanDate, isoDate } from '../../lib/content';
 
 export async function getStaticPaths() {
   return (await getCollection('pre')).map((doc) => ({ params: { slug: doc.id }, props: { doc } }));
 }
 const { doc } = Astro.props;
-const { Content } = await render(doc);
+const { Content, headings } = await render(doc);
 const md = `/pre/${doc.id}.md`;
+const { status, version, validUntil, recipient } = doc.data;
+const expired = validUntil ? validUntil.getTime() < Date.now() : false;
 ---
 <Base title={doc.data.title} description={doc.data.description} noindex md={md}>
   <Header />
-  <main class="wrap">
+  <main class="wrap doc">
     <article>
       <p class="cmd only-dev">cat <b>~/shared/{doc.id}.md</b></p>
       <div class="badge">
-        <span class="only-human">{doc.data.recipient ? `Pripravené pre ${doc.data.recipient}` : 'Pripravené pre teba'}</span>
-        <span class="only-dev">// for: {doc.data.recipient ?? 'you'}</span>
+        <span class="only-human">{recipient ? `Pripravené pre ${recipient}` : 'Pripravené pre teba'}</span>
+        <span class="only-dev">// for: {recipient ?? 'you'}</span>
         <span class="sep">·</span>
         <time datetime={doc.data.date.toISOString()}><span class="only-human">{humanDate(doc.data.date)}</span><span class="only-dev">{isoDate(doc.data.date)}</span></time>
       </div>
       <h1>{doc.data.title}</h1>
       {doc.data.description && <p class="lede">{doc.data.description}</p>}
-      <AiActions md={md} filename={`${doc.id}.md`} title={doc.data.title} />
+      <a class="jump no-print" href="#panel"><span class="only-human">Obsah a stiahnutie ↓</span><span class="only-dev">// toc &amp; export ↓</span></a>
       <Prose><Content /></Prose>
       <aside class="from no-print">
         <img src="/logo.svg" alt="" width="40" height="40" />
@@ -35,22 +37,46 @@ const md = `/pre/${doc.id}.md`;
       </aside>
       <p class="print-only">Michal Stupák · hello@michalstupak.com · {new URL(`/pre/${doc.id}`, Astro.site).href}</p>
     </article>
+
+    <DocSidebar
+      metaLabel="O dokumente"
+      meta={[
+        { label: 'Stav', value: status, className: `status ${status.replace(' ', '-')}` },
+        ...(version ? [{ label: 'Verzia', value: `v${version}` }] : []),
+        { label: 'Dátum', value: isoDate(doc.data.date) },
+        ...(validUntil ? [{ label: 'Platí do', value: isoDate(validUntil) + (expired ? ' (vypršalo)' : ''), className: expired ? 'expired' : undefined }] : []),
+      ]}
+      headings={headings}
+      md={md}
+      filename={`${doc.id}.md`}
+      title={doc.data.title}
+    />
   </main>
   <Footer />
 </Base>
+
 <style>
   article { padding-top: 4rem; padding-bottom: 2rem; }
   .badge { display: inline-flex; flex-wrap: wrap; gap: .4rem; font-size: .8125rem; color: var(--muted); padding: .35rem .8rem; border: 1px solid var(--line); border-radius: 999px; }
   :global([data-mode='dev']) .badge { border: 0; padding: 0; font-family: var(--mono); color: var(--comment); }
   :global([data-mode='dev']) .sep { display: none; }
-  h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(2.5rem, 8vw, 4rem); line-height: 1.02; letter-spacing: -0.02em; margin: 1.25rem 0 1rem; }
+  h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(2.5rem, 7vw, 4rem); line-height: 1.02; letter-spacing: -0.02em; margin: 1.25rem 0 1rem; }
   :global([data-mode='dev']) h1 { font-family: var(--mono); font-weight: 600; font-size: clamp(1.75rem, 6vw, 2.5rem); line-height: 1.25; }
-  .lede { font-family: var(--serif); font-size: 1.375rem; line-height: 1.35; color: var(--muted); margin: 0; }
+  .lede { font-family: var(--serif); font-size: 1.375rem; line-height: 1.35; color: var(--muted); margin: 0 0 2.5rem; }
   :global([data-mode='dev']) .lede { font-family: var(--mono); font-size: .9375rem; }
   .from { display: flex; gap: 1rem; align-items: center; margin-top: 3.5rem; padding-top: 1.5rem; border-top: 1px solid var(--line); font-size: .9375rem; }
   .from img { outline: 1px solid var(--line); }
   .from p { margin: 0; }
-  .print-only { display: none; }
-  @media print { .lede { margin-bottom: 2rem; } .print-only { display: block; margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--line); font-size: 9pt; color: var(--muted); } }
   .from span { color: var(--muted); }
+  .print-only { display: none; }
+
+  .doc :global(.status) { display: inline-block; padding: .1rem .55rem; border-radius: 999px; font-size: .75rem; border: 1px solid currentColor; }
+  .doc :global(.status.návrh) { color: var(--muted); }
+  .doc :global(.status.na-pripomienky) { color: var(--string); }
+  .doc :global(.status.finálne) { color: var(--bg); background: var(--accent); border-color: var(--accent); }
+  .doc :global(.expired) { color: var(--accent); }
+  @media print {
+    .lede { margin-bottom: 2rem; }
+    .print-only { display: block; margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--line); font-size: 9pt; color: var(--muted); }
+  }
 </style>

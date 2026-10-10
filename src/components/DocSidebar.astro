@@ -1,0 +1,81 @@
+---
+// Bočný panel pre dlhé texty (články, stránky pre adresáta): meta, obsah so scrollspy, export pre AI.
+import type { MarkdownHeading } from 'astro';
+import AiActions from './AiActions.astro';
+interface Meta { label: string; value?: string; className?: string; links?: { text: string; href: string }[] }
+interface Props { meta: Meta[]; metaLabel?: string; headings: MarkdownHeading[]; md: string; filename: string; title: string }
+const { meta, metaLabel = 'O dokumente', headings, md, filename, title } = Astro.props;
+const toc = headings.filter((h) => h.depth === 2);
+---
+<aside class="side no-print" id="panel" aria-label={metaLabel}>
+  <div class="block">
+    <p class="label"><span class="only-human">{metaLabel}</span><span class="only-dev">// meta</span></p>
+    <dl>
+      {meta.map((m) => (
+        <div><dt>{m.label}</dt><dd class={m.className}>{m.links ? m.links.map((l) => <a href={l.href}>{l.text}</a>) : m.value}</dd></div>
+      ))}
+    </dl>
+    <slot />
+  </div>
+
+  {toc.length > 1 && (
+    <details class="block toc" open>
+      <summary class="label"><span class="only-human">Obsah</span><span class="only-dev">// toc</span></summary>
+      <ol>
+        {toc.map((h) => <li><a href={`#${h.slug}`} data-toc={h.slug}>{h.text}</a></li>)}
+      </ol>
+    </details>
+  )}
+
+  <div class="block">
+    <AiActions md={md} filename={filename} title={title} compact />
+  </div>
+</aside>
+
+<script is:inline>
+  // zvýrazni aktuálnu sekciu v obsahu
+  (function () {
+    var links = document.querySelectorAll('[data-toc]');
+    if (!links.length || !('IntersectionObserver' in window)) return;
+    var map = {};
+    links.forEach(function (a) { map[a.dataset.toc] = a; });
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        links.forEach(function (a) { a.removeAttribute('aria-current'); });
+        var a = map[e.target.id]; if (a) a.setAttribute('aria-current', 'true');
+      });
+    }, { rootMargin: '0px 0px -70% 0px' });
+    Object.keys(map).forEach(function (id) { var el = document.getElementById(id); if (el) io.observe(el); });
+  })();
+</script>
+
+<style>
+  .side { position: sticky; top: 1.5rem; padding-top: 4rem; display: grid; gap: 1.75rem; font-size: .875rem; max-height: calc(100vh - 3rem); overflow-y: auto; }
+  .block { border-top: 1px solid var(--line); padding-top: .9rem; }
+  .label { display: block; margin: 0 0 .6rem; font-size: .6875rem; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+  :global([data-mode='dev']) .label { text-transform: none; letter-spacing: 0; font-size: .8125rem; color: var(--comment); font-family: var(--mono); }
+  summary.label { cursor: pointer; list-style: none; }
+  summary.label::-webkit-details-marker { display: none; }
+  dl { margin: 0; display: grid; gap: .4rem; }
+  dl div { display: flex; justify-content: space-between; gap: 1rem; }
+  dt { color: var(--muted); }
+  dd { margin: 0; text-align: right; }
+  dd a { color: var(--accent); text-decoration: none; }
+  dd a + a { margin-left: .5rem; }
+  :global([data-mode='dev']) dd { font-family: var(--mono); font-size: .8125rem; }
+  .toc ol { list-style: none; margin: 0; padding: 0; display: grid; gap: .1rem; counter-reset: toc; }
+  .toc li { counter-increment: toc; }
+  .toc a { display: flex; gap: .6rem; padding: .3rem 0 .3rem .6rem; margin-left: -.6rem; text-decoration: none; color: var(--muted); line-height: 1.35; border-left: 2px solid transparent; transition: color .2s, border-color .2s; }
+  .toc a::before { content: counter(toc, decimal-leading-zero); font-size: .6875rem; padding-top: .15rem; opacity: .6; }
+  .toc a:hover { color: var(--fg); }
+  .toc a[aria-current='true'] { color: var(--fg); border-left-color: var(--accent); }
+
+  /* mobil: panel ide pod text, export ako riadok tlačidiel */
+  @media (max-width: 60rem) {
+    .side { position: static; padding: 2rem 0 0; max-height: none; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+    .side .block:last-child { grid-column: 1 / -1; }
+    .side :global(.compact .row) { flex-direction: row; flex-wrap: wrap; }
+  }
+  @media (max-width: 34rem) { .side { grid-template-columns: 1fr; } }
+</style>

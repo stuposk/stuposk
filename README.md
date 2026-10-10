@@ -43,3 +43,9 @@ npm run share -- "Návrh spolupráce" "Janu Novákovú"
 - Adresa má náhodnú príponu, stránka má `noindex`, nie je v sitemap ani v žiadnom zozname.
 - **Nie je to šifrované ani za heslom.** Kto má link, vidí obsah. A ak je repo verejné, obsah je viditeľný aj tam, takže citlivé veci sem nedávaj (alebo maj repo súkromné).
 - PDF = tlačidlo „↓ PDF“ otvorí tlač prehliadača s čistým tlačovým štýlom („Uložiť ako PDF“).
+
+### Skill pre Claude Code
+
+`.claude/skills/vystup-pre-klienta/` obsahuje postup, štruktúru, pravidlá písania a šablónu mailu pre výstupy na `/pre/`. Stačí Claudovi povedať napr. „priprav návrh spolupráce pre Janu z firmy X“ a skill sa použije.
+
+Stránky `/pre/` aj blogové články majú bočný panel s meta údajmi (stav, verzia, platnosť / dátum, čas čítania, témy), obsahom, ktorý zvýrazňuje aktuálnu sekciu, a exportom pre AI.

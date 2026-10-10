@@ -21,6 +21,9 @@ const pre = defineCollection({
     recipient: z.string().optional(),
     description: z.string().optional(),
     date: z.coerce.date(),
+    status: z.enum(['návrh', 'na pripomienky', 'finálne']).default('návrh'),
+    version: z.string().optional(),
+    validUntil: z.coerce.date().optional(),
   }),
 });
 
