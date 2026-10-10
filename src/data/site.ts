@@ -7,7 +7,7 @@ export const site = {
   email: 'michal@unite.sk',
   links: {
     linkedin: 'https://www.linkedin.com/in/michalstupak',
-    instagram: 'https://www.instagram.com/TODO',
+    instagram: 'https://www.instagram.com/michalstupak',
   },
 };
 
