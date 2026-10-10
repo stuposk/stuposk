@@ -1,0 +1,11 @@
+---
+// Konkrétna verzia výstupu: /pre/<id>/v1
+import ShareView from '../../../components/ShareView.astro';
+import { getShares, type Share, type Version } from '../../../lib/content';
+
+export async function getStaticPaths() {
+  return (await getShares()).flatMap((share) => share.versions.map((entry) => ({ params: { slug: share.id, v: `v${entry.n}` }, props: { share, entry } })));
+}
+const { share, entry } = Astro.props as { share: Share; entry: Version };
+---
+<ShareView share={share} entry={entry} />

@@ -8,7 +8,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "share": "node scripts/new-share.mjs",
-    "shares": "node scripts/list-shares.mjs"
+    "shares": "node scripts/list-shares.mjs",
+    "share:v": "node scripts/new-version.mjs"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.19",

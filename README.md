@@ -35,18 +35,20 @@ RSS: `/rss.xml`, sitemap sa generuje pri builde.
 Pošleš niekomu link mailom a on si obsah stiahne ako `.md` / PDF alebo ho otvorí rovno v Claude či ChatGPT.
 
 ```
-npm run share -- "Návrh spolupráce" "Jana Nováková"
-# → src/content/klienti/jana-novakova.yaml (ak ešte neexistuje)
-# → src/content/pre/navrh-spoluprace-1a2b3c4d.md
-# → https://michalstupak.com/pre/navrh-spoluprace-1a2b3c4d
+npm run share -- "Návrh spolupráce" jana@acme.sk      # nový výstup → src/content/pre/<id>/v1.md
+npm run share:v -- <id> "Pilot skrátený na 4 týždne"   # nová verzia na TOM ISTOM linku → v2.md
+npm run shares                                        # prehľad: kto dostal čo, verzie, kedy odoslané
+npm run shares -- jana@acme.sk                        # len jeden človek
 ```
 
-- Každý výstup má `client` (súbor v `src/content/klienti/`). Výstupy pre toho istého klienta sa navzájom prelinkujú v bočnom paneli aj v `.md`.
-- `sentAt` / `sentTo` evidujú, kedy a komu si link poslal. `npm run shares` vypíše prehľad podľa klientov (`npm run shares -- jana-novakova` len jedného).
-- E-maily klientov ani `sentTo` sa na web nevypisujú, ale sú v repozitári.
+- **Adresát = osoba podľa e-mailu** (`to: [jana@acme.sk]`). Mená a tvary mien sú v `src/content/ludia.yaml`.
+- **Verzie:** `/pre/<id>` ukazuje vždy najnovšiu verziu. Staršie sú na `/pre/<id>/v1` s upozornením, že existuje novšia. V bočnom paneli je história verzií so zmenami.
+- **Ďalšie výstupy pre teba:** v bočnom paneli aj v `.md` sa prelinkujú výstupy, ktoré dostali všetci adresáti daného výstupu. Pri spoločnom výstupe pre viac ľudí sa teda nikomu neukáže cudzí výstup.
+- E-maily sa na web nevypisujú, ale sú v repozitári.
 - Adresa má náhodnú príponu, stránka má `noindex`, nie je v sitemap ani v žiadnom zozname.
-- **Nie je to šifrované ani za heslom.** Kto má link, vidí obsah. A ak je repo verejné, obsah je viditeľný aj tam, takže citlivé veci sem nedávaj (alebo maj repo súkromné).
+- **Nie je to šifrované ani za heslom.** Kto má link, vidí obsah (aj zoznam ďalších výstupov pre toho človeka). Ak je repo verejné, obsah je viditeľný aj tam, takže repo maj súkromné.
 - PDF = tlačidlo „↓ PDF“ otvorí tlač prehliadača s čistým tlačovým štýlom („Uložiť ako PDF“).
+- Výstupy nesú značku „powered by /kolega“ (stránka, PDF aj `.md`).
 
 ### Skill pre Claude Code
 

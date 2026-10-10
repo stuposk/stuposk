@@ -1,0 +1,6 @@
+# Ľudia, ktorým posielaš výstupy. Kľúč je e-mail (na web sa nevypisuje).
+# pre = tvar mena po „Pripravené pre …“
+jana@example.com:
+  name: Jana Nováková
+  pre: Janu Novákovú
+  company: ACME s.r.o.

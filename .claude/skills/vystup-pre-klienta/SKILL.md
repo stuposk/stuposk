@@ -12,27 +12,29 @@ Výsledkom je jedna stránka na `https://michalstupak.com/pre/<slug>`, ktorej li
 ## Postup
 
 1. **Ujasni si zadanie.** Ak to nie je jasné z kontextu, zisti od Michala:
-   - komu to je (meno, firma, rola). Najprv pozri `npm run -s shares` a `src/content/klienti/`, či klient už existuje a čo mu už išlo; nadväzuj na predchádzajúce výstupy a neopakuj ich,
+   - komu to je: **e-mail** adresáta (alebo viacerých). Adresát = konkrétna osoba podľa e-mailu, nie firma,
+   - čo ten človek už dostal: `npm run -s shares -- jana@acme.sk`. Nadväzuj na predchádzajúce výstupy a neopakuj ich,
+   - či ide o **nový výstup**, alebo o **novú verziu** existujúceho (oprava, doplnenie, reakcia na pripomienky). Nová verzia ide na **ten istý link**,
    - či si tykajú alebo vykajú,
    - čo má adresát po prečítaní urobiť (jeden konkrétny ďalší krok),
    - aké čísla, termíny a podklady sú k dispozícii. **Nič si nevymýšľaj:** chýbajúce údaje označ `doplň: …` a povedz o nich Michalovi.
-2. **Vytvor súbor:** `npm run share -- "Názov" "Jana Nováková"` (alebo id existujúceho klienta, napr. `jana-novakova`). Skript vypíše cestu k súboru a link. Nového klienta založí v `src/content/klienti/<id>.yaml`; doplň v ňom `pre` (tvar po „Pripravené pre …“, napr. „Janu Novákovú“), `company` a `email`.
-3. **Doplň frontmatter:**
+2. **Vytvor súbor:**
+   - nový výstup: `npm run share -- "Názov" jana@acme.sk [peter@acme.sk …]` → `src/content/pre/<id>/v1.md`. Nových ľudí skript pridá do `src/content/ludia.yaml`; doplň im `name`, `pre` (tvar po „Pripravené pre …“, napr. „Janu Novákovú“) a `company`.
+   - nová verzia: `npm run share:v -- <id> "čo sa zmenilo"` → `v2.md`, `v3.md`… Link `/pre/<id>` ukáže vždy najnovšiu verziu, staršie ostanú na `/pre/<id>/v1`. Uprav len to, čo sa mení, a `changes` napíš z pohľadu adresáta („Pilot skrátený na 4 týždne, doplnená cena“).
+3. **Skontroluj frontmatter:**
    ```yaml
    title: "Návrh spolupráce: AI asistent pre HR"   # konkrétny, nie „Ponuka“
-   client: jana-novakova                            # id klienta; meno sa vezme z klienta
-   # recipient: "celý tím ACME"                     # len ak chceš prepísať meno z klienta
+   to: [jana@acme.sk]       # komu; podľa toho sa prelinkujú ďalšie výstupy pre tú istú osobu
    description: "Jedna veta: čo navrhujem a prečo." # podnadpis, aj prvý riadok v .md
    date: 2026-10-10
    status: návrh            # návrh | na pripomienky | finálne
-   version: "1.0"           # pri každej zmene po odoslaní zvýš (1.1, 2.0)
+   changes: "…"             # len vo v2+: čo je nové oproti predchádzajúcej verzii
    validUntil: 2026-11-10   # len pri ponukách s cenou
-   sentAt: 2026-10-10       # doplň, keď Michal link odošle
-   sentTo: [jana@acme.sk]   # komu išiel (na web sa nevypisuje)
+   sentAt: 2026-10-10       # doplň, keď Michal túto verziu odošle
    ```
-   Výstupy s rovnakým `client` sa na stránke navzájom prelinkujú v bloku „Ďalšie výstupy pre …“ a v `.md` exporte v sekcii „Súvisiace výstupy“.
+   Na stránke sa v bočnom paneli zobrazí história verzií a „Ďalšie výstupy pre teba“: výstupy, ktoré dostali **všetci** adresáti tohto výstupu (pri spoločnom výstupe sa teda nikomu neukáže cudzí). E-maily sa na web nevypisujú.
 4. **Napíš obsah** podľa štruktúry nižšie.
-5. **Over:** `npm run build` musí prejsť. Potom skontroluj stránku `/pre/<slug>`, jej Markdown na `/pre/<slug>.md` a náhľad tlače (PDF).
+5. **Over:** `npm run build` musí prejsť. Potom skontroluj stránku `/pre/<id>`, jej Markdown na `/pre/<id>.md` a náhľad tlače (PDF). Pri novej verzii aj to, že `/pre/<id>/v<N-1>` ukazuje upozornenie na novšiu verziu.
 6. **Odovzdaj Michalovi:** link, návrh krátkeho mailu (šablóna nižšie) a zoznam vecí označených `doplň`.
 
 ## Štruktúra dokumentu
@@ -65,9 +67,11 @@ Stránka **nie je za heslom**. Má len nehádateľnú adresu, `noindex` a nie je
 
 - nedávaj sem heslá, prístupové údaje, rodné čísla, čísla účtov ani interné poznámky o klientovi,
 - pri citlivých číslach sa Michala opýtaj, či ich chce mať na webe,
-- keď výstup stratí platnosť, súbor zmaž (link potom vráti 404).
+- keď výstup stratí platnosť, zmaž celú zložku `src/content/pre/<id>/` (link potom vráti 404). Staršie verzie nemaž jednotlivo, kým na ne môže niekto mať odkaz.
 
 ## Šablóna mailu
+
+Pri novej verzii namiesto „posielam“ napíš „aktualizoval som“ a do mailu daj obsah `changes`. Link je ten istý.
 
 ```
 Predmet: {title}
@@ -87,10 +91,11 @@ Michal
 
 ## Kontrolný zoznam pred odoslaním
 
-- [ ] `title` je konkrétny, `client` je nastavený a klient má správny tvar `pre`, `status` a `version` sedia
-- [ ] po odoslaní doplnené `sentAt` a `sentTo`
+- [ ] `title` je konkrétny, `to` obsahuje správne e-maily a ľudia v `ludia.yaml` majú meno a tvar `pre`
+- [ ] pri v2+ je vyplnené `changes` a predchádzajúca verzia ostala nezmenená
 - [ ] „V skratke“ obstojí aj samostatne
 - [ ] všetky čísla a termíny sú od Michala, nie vymyslené; nič neostalo označené `doplň`
 - [ ] je tam presne jeden jasný ďalší krok s termínom
 - [ ] žiadne citlivé údaje
 - [ ] `npm run build` prešiel a stránka, `.md` aj PDF vyzerajú dobre
+- [ ] po odoslaní doplnené `sentAt`

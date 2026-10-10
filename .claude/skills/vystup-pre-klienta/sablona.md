@@ -1,13 +1,11 @@
 ---
 title: "Návrh spolupráce: {čo}"
-client: {id-klienta}
+to: [{email}]
 description: "{Jedna veta: čo navrhujem a prečo.}"
 date: {YYYY-MM-DD}
 status: návrh
-version: "1.0"
 validUntil: {YYYY-MM-DD}
 # sentAt: {YYYY-MM-DD}
-# sentTo: [{email}]
 ---
 
 ## V skratke
