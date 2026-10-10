@@ -7,6 +7,6 @@ export async function getStaticPaths() {
 }
 
 export const GET: APIRoute = ({ props, site }) =>
-  new Response(toMarkdown(props.doc, new URL(`/pre/${props.doc.id}`, site)), {
+  new Response(toMarkdown(props.doc, new URL(`/pre/${props.doc.id}`, site), { kolega: true }), {
     headers: { 'Content-Type': 'text/markdown; charset=utf-8' },
   });

@@ -5,6 +5,7 @@ import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import Prose from '../../components/Prose.astro';
 import DocSidebar from '../../components/DocSidebar.astro';
+import PoweredBy from '../../components/PoweredBy.astro';
 import { humanDate, isoDate } from '../../lib/content';
 
 export async function getStaticPaths() {
@@ -34,8 +35,9 @@ const expired = validUntil ? validUntil.getTime() < Date.now() : false;
       <aside class="from no-print">
         <img src="/logo.svg" alt="" width="40" height="40" />
         <p><b>Michal Stupák</b><br /><span>Otázky? Odpíš na mail alebo napíš na <a href="mailto:hello@michalstupak.com">hello@michalstupak.com</a>.</span></p>
+        <PoweredBy />
       </aside>
-      <p class="print-only">Michal Stupák · hello@michalstupak.com · {new URL(`/pre/${doc.id}`, Astro.site).href}</p>
+      <p class="print-only">Michal Stupák · hello@michalstupak.com · {new URL(`/pre/${doc.id}`, Astro.site).href}<br /><PoweredBy variant="print" /></p>
     </article>
 
     <DocSidebar
@@ -50,6 +52,7 @@ const expired = validUntil ? validUntil.getTime() < Date.now() : false;
       md={md}
       filename={`${doc.id}.md`}
       title={doc.data.title}
+      kolega
     />
   </main>
   <Footer />
@@ -66,7 +69,8 @@ const expired = validUntil ? validUntil.getTime() < Date.now() : false;
   :global([data-mode='dev']) .lede { font-family: var(--mono); font-size: .9375rem; }
   .from { display: flex; gap: 1rem; align-items: center; margin-top: 3.5rem; padding-top: 1.5rem; border-top: 1px solid var(--line); font-size: .9375rem; }
   .from img { outline: 1px solid var(--line); }
-  .from p { margin: 0; }
+  .from p { margin: 0; flex: 1; }
+  .from > :global(.kolega) { align-self: flex-end; }
   .from span { color: var(--muted); }
   .print-only { display: none; }
 

@@ -2,9 +2,10 @@
 // Bočný panel pre dlhé texty (články, stránky pre adresáta): meta, obsah so scrollspy, export pre AI.
 import type { MarkdownHeading } from 'astro';
 import AiActions from './AiActions.astro';
+import PoweredBy from './PoweredBy.astro';
 interface Meta { label: string; value?: string; className?: string; links?: { text: string; href: string }[] }
-interface Props { meta: Meta[]; metaLabel?: string; headings: MarkdownHeading[]; md: string; filename: string; title: string }
-const { meta, metaLabel = 'O dokumente', headings, md, filename, title } = Astro.props;
+interface Props { meta: Meta[]; metaLabel?: string; headings: MarkdownHeading[]; md: string; filename: string; title: string; kolega?: boolean }
+const { meta, metaLabel = 'O dokumente', headings, md, filename, title, kolega = false } = Astro.props;
 const toc = headings.filter((h) => h.depth === 2);
 ---
 <aside class="side no-print" id="panel" aria-label={metaLabel}>
@@ -29,6 +30,7 @@ const toc = headings.filter((h) => h.depth === 2);
 
   <div class="block">
     <AiActions md={md} filename={filename} title={title} compact />
+    {kolega && <p class="powered"><PoweredBy /></p>}
   </div>
 </aside>
 
@@ -64,6 +66,7 @@ const toc = headings.filter((h) => h.depth === 2);
   dd a { color: var(--accent); text-decoration: none; }
   dd a + a { margin-left: .5rem; }
   :global([data-mode='dev']) dd { font-family: var(--mono); font-size: .8125rem; }
+  .powered { margin: .9rem 0 0; }
   .toc ol { list-style: none; margin: 0; padding: 0; display: grid; gap: .1rem; counter-reset: toc; }
   .toc li { counter-increment: toc; }
   .toc a { display: flex; gap: .6rem; padding: .3rem 0 .3rem .6rem; margin-left: -.6rem; text-decoration: none; color: var(--muted); line-height: 1.35; border-left: 2px solid transparent; transition: color .2s, border-color .2s; }

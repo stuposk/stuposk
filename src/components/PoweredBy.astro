@@ -1,0 +1,15 @@
+---
+// Značka „powered by /kolega“ pre výstupy (stránky /pre, export, PDF).
+interface Props { variant?: 'inline' | 'print' }
+const { variant = 'inline' } = Astro.props;
+---
+<a class:list={['kolega', variant]} href="https://kolega.cloud" target="_blank" rel="noopener">
+  <span class="by">powered by</span> <b>/kolega</b>
+</a>
+<style>
+  .kolega { display: inline-flex; align-items: baseline; gap: .35rem; font-family: var(--mono); font-size: .75rem; color: var(--muted); text-decoration: none; white-space: nowrap; }
+  .kolega b { color: var(--fg); font-weight: 600; }
+  .kolega:hover, .kolega:hover b { color: var(--accent); }
+  .print { display: none; }
+  @media print { .inline { display: none; } .print { display: inline-flex; color: #444; } .print b { color: #000; } }
+</style>

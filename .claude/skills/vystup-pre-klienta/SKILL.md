@@ -5,6 +5,8 @@ description: Pripraví výstup pre klienta alebo partnera ako stránku na michal
 
 # Výstup pre klienta (`/pre/…`)
 
+Výstupy sú súčasťou **/kolega** (kolega.cloud). Stránka, PDF aj `.md` export nesú značku „powered by /kolega“ automaticky, do textu ju nepíš.
+
 Výsledkom je jedna stránka na `https://michalstupak.com/pre/<slug>`, ktorej link Michal pošle mailom. Adresát si ju prečíta v prehliadači a cez bočný panel si ju stiahne ako `.md` alebo PDF, prípadne ju otvorí v Claude či ChatGPT a pokračuje tam. Píš preto tak, aby text dával zmysel **aj bez Michala a aj pre cudzí AI model**.
 
 ## Postup
