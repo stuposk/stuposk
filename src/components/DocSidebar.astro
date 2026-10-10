@@ -16,7 +16,6 @@ const toc = headings.filter((h) => h.depth === 2);
         <div><dt>{m.label}</dt><dd class={m.className}>{m.links ? m.links.map((l) => <a href={l.href}>{l.text}</a>) : m.value}</dd></div>
       ))}
     </dl>
-    <slot />
   </div>
 
   {toc.length > 1 && (
@@ -27,6 +26,8 @@ const toc = headings.filter((h) => h.depth === 2);
       </ol>
     </details>
   )}
+
+  <slot name="after" />
 
   <div class="block">
     <AiActions md={md} filename={filename} title={title} compact />

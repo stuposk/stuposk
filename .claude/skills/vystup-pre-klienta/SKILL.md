@@ -12,21 +12,25 @@ Výsledkom je jedna stránka na `https://michalstupak.com/pre/<slug>`, ktorej li
 ## Postup
 
 1. **Ujasni si zadanie.** Ak to nie je jasné z kontextu, zisti od Michala:
-   - komu to je (meno, firma, rola) a v akom tvare ho osloviť (napr. „pre Janu Novákovú“),
+   - komu to je (meno, firma, rola). Najprv pozri `npm run -s shares` a `src/content/klienti/`, či klient už existuje a čo mu už išlo; nadväzuj na predchádzajúce výstupy a neopakuj ich,
    - či si tykajú alebo vykajú,
    - čo má adresát po prečítaní urobiť (jeden konkrétny ďalší krok),
    - aké čísla, termíny a podklady sú k dispozícii. **Nič si nevymýšľaj:** chýbajúce údaje označ `doplň: …` a povedz o nich Michalovi.
-2. **Vytvor súbor:** `npm run share -- "Názov" "adresát v 4. páde"`. Skript vypíše cestu k súboru a link.
+2. **Vytvor súbor:** `npm run share -- "Názov" "Jana Nováková"` (alebo id existujúceho klienta, napr. `jana-novakova`). Skript vypíše cestu k súboru a link. Nového klienta založí v `src/content/klienti/<id>.yaml`; doplň v ňom `pre` (tvar po „Pripravené pre …“, napr. „Janu Novákovú“), `company` a `email`.
 3. **Doplň frontmatter:**
    ```yaml
    title: "Návrh spolupráce: AI asistent pre HR"   # konkrétny, nie „Ponuka“
-   recipient: "Janu Novákovú"                       # zobrazí sa ako „Pripravené pre …“
+   client: jana-novakova                            # id klienta; meno sa vezme z klienta
+   # recipient: "celý tím ACME"                     # len ak chceš prepísať meno z klienta
    description: "Jedna veta: čo navrhujem a prečo." # podnadpis, aj prvý riadok v .md
    date: 2026-10-10
    status: návrh            # návrh | na pripomienky | finálne
    version: "1.0"           # pri každej zmene po odoslaní zvýš (1.1, 2.0)
    validUntil: 2026-11-10   # len pri ponukách s cenou
+   sentAt: 2026-10-10       # doplň, keď Michal link odošle
+   sentTo: [jana@acme.sk]   # komu išiel (na web sa nevypisuje)
    ```
+   Výstupy s rovnakým `client` sa na stránke navzájom prelinkujú v bloku „Ďalšie výstupy pre …“ a v `.md` exporte v sekcii „Súvisiace výstupy“.
 4. **Napíš obsah** podľa štruktúry nižšie.
 5. **Over:** `npm run build` musí prejsť. Potom skontroluj stránku `/pre/<slug>`, jej Markdown na `/pre/<slug>.md` a náhľad tlače (PDF).
 6. **Odovzdaj Michalovi:** link, návrh krátkeho mailu (šablóna nižšie) a zoznam vecí označených `doplň`.
@@ -83,7 +87,8 @@ Michal
 
 ## Kontrolný zoznam pred odoslaním
 
-- [ ] `title` je konkrétny, `recipient` je v správnom páde, `status` a `version` sedia
+- [ ] `title` je konkrétny, `client` je nastavený a klient má správny tvar `pre`, `status` a `version` sedia
+- [ ] po odoslaní doplnené `sentAt` a `sentTo`
 - [ ] „V skratke“ obstojí aj samostatne
 - [ ] všetky čísla a termíny sú od Michala, nie vymyslené; nič neostalo označené `doplň`
 - [ ] je tam presne jeden jasný ďalší krok s termínom

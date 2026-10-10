@@ -1,12 +1,13 @@
 import type { APIRoute } from 'astro';
-import { getCollection } from 'astro:content';
-import { toMarkdown } from '../../lib/content';
+import { getShares, toMarkdown, type Share } from '../../lib/content';
 
 export async function getStaticPaths() {
-  return (await getCollection('pre')).map((doc) => ({ params: { slug: doc.id }, props: { doc } }));
+  return (await getShares()).map((share) => ({ params: { slug: share.doc.id }, props: { share } }));
 }
 
-export const GET: APIRoute = ({ props, site }) =>
-  new Response(toMarkdown(props.doc, new URL(`/pre/${props.doc.id}`, site), { kolega: true }), {
+export const GET: APIRoute = ({ props, site }) => {
+  const { doc, recipient, related } = props.share as Share;
+  return new Response(toMarkdown(doc, new URL(`/pre/${doc.id}`, site), { kolega: true, recipient, related }), {
     headers: { 'Content-Type': 'text/markdown; charset=utf-8' },
   });
+};

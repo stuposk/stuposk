@@ -1,11 +1,13 @@
 ---
 title: "Ukážka: Návrh spolupráce"
-recipient: "Janu Novákovú"
+client: ukazka-jana-novakova
 description: Ukážková stránka pre adresáta. Vytvor vlastnú cez npm run share.
 date: 2026-10-10
 status: na pripomienky
 version: "1.0"
 validUntil: 2026-11-10
+sentAt: 2026-10-10
+sentTo: [jana@example.com]
 ---
 
 ## V skratke

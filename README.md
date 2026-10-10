@@ -35,11 +35,15 @@ RSS: `/rss.xml`, sitemap sa generuje pri builde.
 Pošleš niekomu link mailom a on si obsah stiahne ako `.md` / PDF alebo ho otvorí rovno v Claude či ChatGPT.
 
 ```
-npm run share -- "Návrh spolupráce" "Janu Novákovú"
+npm run share -- "Návrh spolupráce" "Jana Nováková"
+# → src/content/klienti/jana-novakova.yaml (ak ešte neexistuje)
 # → src/content/pre/navrh-spoluprace-1a2b3c4d.md
 # → https://michalstupak.com/pre/navrh-spoluprace-1a2b3c4d
 ```
 
+- Každý výstup má `client` (súbor v `src/content/klienti/`). Výstupy pre toho istého klienta sa navzájom prelinkujú v bočnom paneli aj v `.md`.
+- `sentAt` / `sentTo` evidujú, kedy a komu si link poslal. `npm run shares` vypíše prehľad podľa klientov (`npm run shares -- jana-novakova` len jedného).
+- E-maily klientov ani `sentTo` sa na web nevypisujú, ale sú v repozitári.
 - Adresa má náhodnú príponu, stránka má `noindex`, nie je v sitemap ani v žiadnom zozname.
 - **Nie je to šifrované ani za heslom.** Kto má link, vidí obsah. A ak je repo verejné, obsah je viditeľný aj tam, takže citlivé veci sem nedávaj (alebo maj repo súkromné).
 - PDF = tlačidlo „↓ PDF“ otvorí tlač prehliadača s čistým tlačovým štýlom („Uložiť ako PDF“).

@@ -1,20 +1,20 @@
 ---
-import { getCollection, render } from 'astro:content';
+import { render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import Prose from '../../components/Prose.astro';
 import DocSidebar from '../../components/DocSidebar.astro';
 import PoweredBy from '../../components/PoweredBy.astro';
-import { humanDate, isoDate } from '../../lib/content';
+import { humanDate, isoDate, getShares, type Share } from '../../lib/content';
 
 export async function getStaticPaths() {
-  return (await getCollection('pre')).map((doc) => ({ params: { slug: doc.id }, props: { doc } }));
+  return (await getShares()).map((share) => ({ params: { slug: share.doc.id }, props: { share } }));
 }
-const { doc } = Astro.props;
+const { doc, client, recipient, related } = Astro.props.share as Share;
 const { Content, headings } = await render(doc);
 const md = `/pre/${doc.id}.md`;
-const { status, version, validUntil, recipient } = doc.data;
+const { status, version, validUntil } = doc.data;
 const expired = validUntil ? validUntil.getTime() < Date.now() : false;
 ---
 <Base title={doc.data.title} description={doc.data.description} noindex md={md}>
@@ -53,7 +53,18 @@ const expired = validUntil ? validUntil.getTime() < Date.now() : false;
       filename={`${doc.id}.md`}
       title={doc.data.title}
       kolega
-    />
+    >
+      {related.length > 0 && (
+        <div class="block related" slot="after">
+          <p class="label"><span class="only-human">Ďalšie výstupy pre {client?.data.company ?? 'teba'}</span><span class="only-dev">// ls ~/shared/{client?.id}/</span></p>
+          <ul>
+            {related.map((r) => (
+              <li><a href={`/pre/${r.id}`}><span class="t">{r.data.title}</span><span class="d">{isoDate(r.data.date)} · {r.data.status}</span></a></li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </DocSidebar>
   </main>
   <Footer />
 </Base>
@@ -79,6 +90,16 @@ const expired = validUntil ? validUntil.getTime() < Date.now() : false;
   .doc :global(.status.na-pripomienky) { color: var(--string); }
   .doc :global(.status.finálne) { color: var(--bg); background: var(--accent); border-color: var(--accent); }
   .doc :global(.expired) { color: var(--accent); }
+  .related { border-top: 1px solid var(--line); padding-top: .9rem; }
+  .related .label { display: block; margin: 0 0 .6rem; font-size: .6875rem; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+  :global([data-mode='dev']) .related .label { text-transform: none; letter-spacing: 0; font-size: .8125rem; color: var(--comment); font-family: var(--mono); }
+  .related ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .5rem; }
+  .related a { display: grid; gap: .1rem; text-decoration: none; padding: .5rem .75rem; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); transition: border-color .2s; }
+  :global([data-mode='dev']) .related a { border-radius: 4px; }
+  .related a:hover { border-color: var(--accent); }
+  .related .t { line-height: 1.3; }
+  .related a:hover .t { color: var(--accent); }
+  .related .d { font-size: .75rem; color: var(--muted); }
   @media print {
     .lede { margin-bottom: 2rem; }
     .print-only { display: block; margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--line); font-size: 9pt; color: var(--muted); }
