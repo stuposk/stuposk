@@ -1,6 +1,6 @@
 # michalstupak.com
 
-Osobná stránka a blog. Astro, bez client-side JS.
+Osobná stránka a blog. Astro, statický web s minimom JavaScriptu.
 
 ```
 npm install
