@@ -8,5 +8,5 @@ export default defineConfig({
     locales: ['sk', 'en'],
     routing: { prefixDefaultLocale: false },
   },
-  integrations: [sitemap()],
+  integrations: [sitemap({ filter: (page) => !page.includes('/pre/') })],
 });

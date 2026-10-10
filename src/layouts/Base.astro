@@ -3,8 +3,8 @@ import '../styles/global.css';
 import { site } from '../data/site';
 import ModeSwitch from '../components/ModeSwitch.astro';
 import { langFromUrl } from '../i18n/ui';
-interface Props { title?: string; description?: string; }
-const { title, description = `${site.name}. ${site.tagline}` } = Astro.props;
+interface Props { title?: string; description?: string; noindex?: boolean; md?: string }
+const { title, description = `${site.name}. ${site.tagline}`, noindex = false, md } = Astro.props;
 const lang = langFromUrl(Astro.url);
 const fullTitle = title ? `${title} · ${site.name}` : site.name;
 const canonical = new URL(Astro.url.pathname, Astro.site);
@@ -24,6 +24,8 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     </script>
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    {md && <link rel="alternate" type="text/markdown" href={md} />}
     <link rel="canonical" href={canonical} />
     <link rel="alternate" hreflang="sk" href={new URL('/', Astro.site)} />
     <link rel="alternate" hreflang="en" href={new URL('/en/', Astro.site)} />

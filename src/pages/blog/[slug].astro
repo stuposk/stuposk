@@ -1,0 +1,67 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import Prose from '../../components/Prose.astro';
+import AiActions from '../../components/AiActions.astro';
+import { getPosts, readingTime, isoDate, humanDate } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return posts.map((post, i) => ({
+    params: { slug: post.id },
+    props: { post, newer: posts[i - 1], older: posts[i + 1] },
+  }));
+}
+const { post, newer, older } = Astro.props;
+const { Content } = await render(post);
+const md = `/blog/${post.id}.md`;
+---
+<Base title={post.data.title} description={post.data.description} md={md}>
+  <Header />
+  <main class="wrap">
+    <article>
+      <p class="cmd only-dev">cat <b>blog/{post.id}.md</b></p>
+      <div class="meta">
+        <time datetime={post.data.date.toISOString()}><span class="only-human">{humanDate(post.data.date)}</span><span class="only-dev">{isoDate(post.data.date)}</span></time>
+        <span>· {readingTime(post.body)} min čítania</span>
+      </div>
+      <h1>{post.data.title}</h1>
+      <p class="lede">{post.data.description}</p>
+      {post.data.tags.length > 0 && (
+        <div class="tags no-print">{post.data.tags.map((t) => <a href={`/blog?tag=${encodeURIComponent(t)}`}>#{t}</a>)}</div>
+      )}
+      <Prose><Content /></Prose>
+      <AiActions md={md} filename={`${post.id}.md`} title={post.data.title} />
+    </article>
+
+    <nav class="pager no-print" aria-label="Ďalšie články">
+      {older ? <a href={`/blog/${older.id}`} class="prev"><small><span class="only-human">← Staršie</span><span class="only-dev">git checkout HEAD~1</span></small><span>{older.data.title}</span></a> : <span />}
+      {newer ? <a href={`/blog/${newer.id}`} class="next"><small><span class="only-human">Novšie →</span><span class="only-dev">git checkout HEAD@&#123;1&#125;</span></small><span>{newer.data.title}</span></a> : <span />}
+    </nav>
+    <p class="back no-print"><a href="/blog"><span class="only-human">← Všetky články</span><span class="only-dev c">cd .. ←</span></a></p>
+  </main>
+  <Footer />
+</Base>
+<style>
+  article { padding-top: 4rem; }
+  .meta { display: flex; gap: .4rem; font-size: .8125rem; color: var(--muted); }
+  h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(2.75rem, 9vw, 4.5rem); line-height: 1; letter-spacing: -0.02em; margin: 1rem 0 1.25rem; }
+  :global([data-mode='dev']) h1 { font-family: var(--mono); font-weight: 600; font-size: clamp(1.75rem, 6vw, 2.5rem); line-height: 1.25; }
+  .lede { font-family: var(--serif); font-size: 1.5rem; line-height: 1.3; color: var(--muted); margin: 0 0 1.5rem; }
+  :global([data-mode='dev']) .lede { font-family: var(--mono); font-size: .9375rem; }
+  :global([data-mode='dev']) .lede::before { content: '// '; color: var(--comment); }
+  .tags { display: flex; flex-wrap: wrap; gap: .75rem; margin: 0 0 3rem; font-size: .8125rem; }
+  .tags a { color: var(--accent); text-decoration: none; }
+  .pager { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 4rem; border-top: 1px solid var(--line); }
+  .pager a { display: grid; gap: .25rem; padding: 1.25rem 0; text-decoration: none; }
+  .pager .next { text-align: right; }
+  .pager small { font-size: .75rem; color: var(--muted); }
+  .pager a span { font-family: var(--serif); font-size: 1.375rem; line-height: 1.2; }
+  :global([data-mode='dev']) .pager a span { font-family: var(--mono); font-size: .9375rem; font-weight: 600; }
+  .pager a:hover span { color: var(--accent); }
+  .back { margin: 2rem 0 0; }
+  .back a { text-decoration: none; }
+  @media (max-width: 34rem) { .pager { grid-template-columns: 1fr; } .pager .next { text-align: left; } }
+</style>

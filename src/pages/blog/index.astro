@@ -1,42 +1,118 @@
 ---
-import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
+import { getPosts, readingTime, isoDate, humanDate } from '../../lib/content';
 
-const iso = (d: Date) => d.toISOString().slice(0, 10);
-const human = new Intl.DateTimeFormat('sk-SK', { day: 'numeric', month: 'long', year: 'numeric' });
-const posts = (await getCollection('blog', (p) => !p.data.draft)).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const posts = await getPosts();
+const tags = [...new Set(posts.flatMap((p) => p.data.tags))].sort((a, b) => a.localeCompare(b, 'sk'));
+const count = (tag: string) => posts.filter((p) => p.data.tags.includes(tag)).length;
 ---
-<Base title="Blog" description="Texty o AI, programovaní, podnikaní a komunite.">
+<Base title="Blog" description="Texty o programovaní, AI, podnikaní a komunite.">
   <Header />
   <main class="wrap">
     <p class="cmd only-dev">ls -t <b>blog/</b></p>
     <h1><span class="only-human">Blog</span><span class="only-dev">blog/</span></h1>
-    <ul>
+    <p class="intro only-human">Poznámky z praxe: kód, firmy, ľudia a čo som sa pri tom naučil.</p>
+
+    <div class="filters" role="search">
+      <label class="search">
+        <span class="only-human visually-hidden">Hľadať</span><span class="only-dev prompt" aria-hidden="true">grep -i</span>
+        <input type="search" placeholder="Hľadať v článkoch…" data-q autocomplete="off" />
+      </label>
+      <div class="chips" role="group" aria-label="Filtrovať podľa témy">
+        <button type="button" data-tag="" aria-pressed="true"><span class="only-human">Všetko</span><span class="only-dev">*</span> <small>{posts.length}</small></button>
+        {tags.map((tag) => (
+          <button type="button" data-tag={tag} aria-pressed="false"><span class="only-human">{tag}</span><span class="only-dev">#{tag}</span> <small>{count(tag)}</small></button>
+        ))}
+      </div>
+    </div>
+
+    <ul class="list">
       {posts.map((p) => (
-        <li>
+        <li data-tags={p.data.tags.join(',')} data-text={`${p.data.title} ${p.data.description} ${p.data.tags.join(' ')}`.toLowerCase()}>
           <a href={`/blog/${p.id}`}>
-            <time datetime={p.data.date.toISOString()}><span class="only-human">{human.format(p.data.date)}</span><span class="only-dev">{iso(p.data.date)}</span></time>
+            <div class="meta">
+              <time datetime={p.data.date.toISOString()}><span class="only-human">{humanDate(p.data.date)}</span><span class="only-dev">{isoDate(p.data.date)}</span></time>
+              <span>· {readingTime(p.body)} min</span>
+            </div>
             <h2>{p.data.title}</h2>
             <p>{p.data.description}</p>
+            {p.data.tags.length > 0 && <div class="tags">{p.data.tags.map((t) => <span>#{t}</span>)}</div>}
           </a>
         </li>
       ))}
     </ul>
+    <p class="empty" hidden data-empty><span class="only-human">Nič som nenašiel. Skús iné slovo alebo tému.</span><span class="only-dev c">// 0 results. exit 1</span></p>
   </main>
   <Footer />
 </Base>
+
+<script is:inline>
+  (function () {
+    var items = Array.prototype.slice.call(document.querySelectorAll('.list li'));
+    var chips = Array.prototype.slice.call(document.querySelectorAll('[data-tag]'));
+    var input = document.querySelector('[data-q]');
+    var empty = document.querySelector('[data-empty]');
+    var params = new URLSearchParams(location.search);
+    var state = { tag: params.get('tag') || '', q: params.get('q') || '' };
+    input.value = state.q;
+
+    function apply() {
+      var q = state.q.trim().toLowerCase(), shown = 0;
+      items.forEach(function (li) {
+        var okTag = !state.tag || li.dataset.tags.split(',').indexOf(state.tag) !== -1;
+        var okQ = !q || li.dataset.text.indexOf(q) !== -1;
+        li.hidden = !(okTag && okQ);
+        if (!li.hidden) shown++;
+      });
+      chips.forEach(function (c) { c.setAttribute('aria-pressed', String(c.dataset.tag === state.tag)); });
+      empty.hidden = shown > 0;
+      var p = new URLSearchParams();
+      if (state.tag) p.set('tag', state.tag);
+      if (state.q) p.set('q', state.q);
+      history.replaceState(null, '', location.pathname + (p.toString() ? '?' + p : ''));
+    }
+    chips.forEach(function (c) { c.addEventListener('click', function () { state.tag = c.dataset.tag; apply(); }); });
+    input.addEventListener('input', function () { state.q = input.value; apply(); });
+    apply();
+  })();
+</script>
+
 <style>
   main { padding-top: 4rem; }
-  h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(4rem, 16vw, 8rem); line-height: .9; letter-spacing: -0.03em; margin: 0 0 3rem; }
-  :global([data-mode='dev']) h1 { font-family: var(--mono); font-weight: 600; font-size: clamp(2rem, 8vw, 3rem); margin-bottom: 1.5rem; }
+  h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(4rem, 16vw, 8rem); line-height: .9; letter-spacing: -0.03em; margin: 0 0 1rem; }
+  :global([data-mode='dev']) h1 { font-family: var(--mono); font-weight: 600; font-size: clamp(2rem, 8vw, 3rem); line-height: 1.2; }
+  .intro { font-family: var(--serif); font-size: 1.5rem; line-height: 1.3; color: var(--muted); margin: 0 0 2.5rem; max-width: 30ch; }
+
+  .filters { display: grid; gap: 1rem; margin: 0 0 2rem; }
+  :global([data-mode='dev']) .filters { margin-top: 1.5rem; }
+  .search { display: flex; align-items: center; gap: .75rem; border-bottom: 1px solid var(--fg); padding: .25rem 0; }
+  :global([data-mode='dev']) .search { border: 1px solid var(--line); border-radius: 4px; padding: .5rem .75rem; background: var(--soft); }
+  .prompt { color: var(--accent); white-space: nowrap; font-size: .875rem; }
+  .prompt::before { content: '$ '; }
+  input { all: unset; flex: 1; min-width: 0; font: inherit; font-size: 1.0625rem; padding: .5rem 0; }
+  :global([data-mode='dev']) input { font-size: .875rem; padding: 0; }
+  input::placeholder { color: var(--muted); }
+  .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+  .chips { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .chips button { all: unset; cursor: pointer; font-size: .875rem; padding: .4rem .85rem; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); transition: all .2s; }
+  :global([data-mode='dev']) .chips button { border-radius: 4px; font-family: var(--mono); font-size: .8125rem; }
+  .chips button:hover { color: var(--fg); border-color: var(--fg); }
+  .chips button[aria-pressed='true'] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+  .chips button:focus-visible { outline: 2px solid var(--accent); }
+  .chips small { opacity: .6; font-size: .75rem; }
+
   ul { list-style: none; padding: 0; margin: 0; }
-  a { display: block; padding: 1.5rem 0; border-top: 1px solid var(--line); text-decoration: none; }
-  :global([data-mode='dev']) a { border-top-style: dashed; padding: 1.25rem 0; }
-  time { font-size: .8125rem; color: var(--muted); }
-  h2 { font-family: var(--serif); font-weight: 400; font-size: 2rem; line-height: 1.15; margin: .25rem 0 .35rem; }
+  .list a { display: block; padding: 1.75rem 0; border-top: 1px solid var(--line); text-decoration: none; }
+  :global([data-mode='dev']) .list a { border-top-style: dashed; padding: 1.25rem 0; }
+  .meta { display: flex; gap: .4rem; font-size: .8125rem; color: var(--muted); }
+  h2 { font-family: var(--serif); font-weight: 400; font-size: clamp(1.75rem, 5vw, 2.25rem); line-height: 1.1; margin: .35rem 0 .5rem; transition: color .2s; }
   :global([data-mode='dev']) h2 { font-family: var(--mono); font-weight: 600; font-size: 1.125rem; }
-  a:hover h2 { color: var(--accent); }
-  p { margin: 0; color: var(--muted); font-size: .9375rem; }
+  .list a:hover h2 { color: var(--accent); }
+  .list p { margin: 0; color: var(--muted); font-size: .9375rem; max-width: 56ch; }
+  .tags { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: .75rem; font-size: .75rem; color: var(--accent); }
+  :global([data-mode='dev']) .tags { font-family: var(--mono); }
+  .empty { padding: 2rem 0; color: var(--muted); }
 </style>

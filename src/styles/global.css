@@ -44,3 +44,14 @@ h1, h2, h3 { margin: 0; }
 
 /* human utility */
 .eyebrow { font-family: var(--sans); font-size: .75rem; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+
+/* tlač / PDF: čisté čierne na bielom, bez navigácie */
+@media print {
+  :root, :root[data-mode='dev'] { --bg: #fff; --fg: #000; --muted: #444; --line: #ccc; --soft: #f4f4f4; --accent: #000; --comment: #555; }
+  header.bar, footer.foot, .switch, .no-print { display: none !important; }
+  body { font-size: 11pt; }
+  a { text-decoration: none; }
+  .prose a::after { content: ' (' attr(href) ')'; font-size: .8em; color: #555; }
+  pre, blockquote, table, img { break-inside: avoid; }
+  h2, h3 { break-after: avoid; }
+}

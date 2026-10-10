@@ -1,0 +1,21 @@
+import { getCollection, type CollectionEntry } from 'astro:content';
+
+export const getPosts = async () =>
+  (await getCollection('blog', (p) => !p.data.draft)).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+export const readingTime = (body = '') => Math.max(1, Math.round(body.trim().split(/\s+/).length / 200));
+
+export const isoDate = (d: Date) => d.toISOString().slice(0, 10);
+export const humanDate = (d: Date) => new Intl.DateTimeFormat('sk-SK', { day: 'numeric', month: 'long', year: 'numeric' }).format(d);
+
+// Markdown verzia pre AI: frontmatter-free hlavička + pôvodné telo.
+export const toMarkdown = (entry: CollectionEntry<'blog'> | CollectionEntry<'pre'>, url: URL) => {
+  const d = entry.data as { title: string; description?: string; date: Date; recipient?: string };
+  const meta = [
+    `Autor: Michal Stupák (hello@michalstupak.com)`,
+    `Dátum: ${isoDate(d.date)}`,
+    d.recipient && `Pre: ${d.recipient}`,
+    `Zdroj: ${url.href}`,
+  ].filter(Boolean);
+  return `# ${d.title}\n\n${d.description ? `> ${d.description}\n\n` : ''}${meta.join('  \n')}\n\n---\n\n${(entry.body ?? '').trim()}\n`;
+};

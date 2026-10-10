@@ -1,0 +1,45 @@
+---
+// Akcie pre čitateľa: stiahnuť .md, uložiť PDF, skopírovať pre AI, otvoriť v Claude / ChatGPT.
+interface Props { md: string; filename: string; title: string }
+const { md, filename, title } = Astro.props;
+const mdUrl = new URL(md, Astro.site).href;
+const prompt = `Prečítaj si tento dokument „${title}“ a pomôž mi s ním ďalej pracovať: ${mdUrl}`;
+const claude = `https://claude.ai/new?q=${encodeURIComponent(prompt)}`;
+const chatgpt = `https://chatgpt.com/?q=${encodeURIComponent(prompt)}`;
+---
+<div class="ai" data-md={md}>
+  <p class="label"><span class="only-human">Pokračuj vo svojom AI</span><span class="only-dev">// export</span></p>
+  <div class="row">
+    <a href={md} download={filename}>↓ .md</a>
+    <button type="button" data-print>↓ PDF</button>
+    <button type="button" data-copy><span data-copy-label>Kopírovať pre AI</span></button>
+    <a href={claude} target="_blank" rel="noopener">Otvoriť v Claude ↗</a>
+    <a href={chatgpt} target="_blank" rel="noopener">Otvoriť v ChatGPT ↗</a>
+  </div>
+</div>
+<script is:inline>
+  document.querySelectorAll('.ai').forEach(function (box) {
+    var md = box.dataset.md;
+    box.querySelector('[data-print]').addEventListener('click', function () { window.print(); });
+    var btn = box.querySelector('[data-copy]'), label = box.querySelector('[data-copy-label]');
+    btn.addEventListener('click', function () {
+      fetch(md).then(function (r) { return r.text(); })
+        .then(function (t) { return navigator.clipboard.writeText(t); })
+        .then(function () { label.textContent = 'Skopírované ✓'; })
+        .catch(function () { label.textContent = 'Nepodarilo sa, stiahni .md'; })
+        .finally(function () { setTimeout(function () { label.textContent = 'Kopírovať pre AI'; }, 2500); });
+    });
+  });
+</script>
+<style>
+  .ai { margin: 2.5rem 0; padding: 1.25rem; border: 1px solid var(--line); border-radius: 12px; background: var(--soft); }
+  :global([data-mode='dev']) .ai { border-radius: 6px; font-family: var(--mono); }
+  .label { margin: 0 0 .75rem; font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  :global([data-mode='dev']) .label { text-transform: none; letter-spacing: 0; color: var(--comment); }
+  .row { display: flex; flex-wrap: wrap; gap: .5rem; }
+  a, button { all: unset; cursor: pointer; font-size: .875rem; padding: .5rem .85rem; border-radius: 999px; border: 1px solid var(--line); background: var(--bg); transition: border-color .2s, color .2s; }
+  :global([data-mode='dev']) :is(a, button) { border-radius: 4px; font-family: var(--mono); font-size: .8125rem; }
+  a:hover, button:hover { border-color: var(--accent); color: var(--accent); }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); }
+  @media print { .ai { display: none; } }
+</style>
