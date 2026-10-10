@@ -10,33 +10,42 @@ export async function getStaticPaths() {
 }
 const { post } = Astro.props;
 const { Content } = await render(post);
-const date = post.data.date.toISOString().slice(0, 10);
+const iso = post.data.date.toISOString().slice(0, 10);
+const human = new Intl.DateTimeFormat('sk-SK', { day: 'numeric', month: 'long', year: 'numeric' }).format(post.data.date);
 ---
 <Base title={post.data.title} description={post.data.description}>
   <Header />
   <main class="wrap">
     <article>
-      <p class="cmd">cat <b>blog/{post.id}.md</b></p>
-      <time class="c" datetime={post.data.date.toISOString()}>{date}</time>
+      <p class="cmd only-dev">cat <b>blog/{post.id}.md</b></p>
+      <time datetime={post.data.date.toISOString()}><span class="only-human eyebrow">{human}</span><span class="only-dev c">{iso}</span></time>
       <h1>{post.data.title}</h1>
+      <p class="lede">{post.data.description}</p>
       <div class="prose"><Content /></div>
     </article>
-    <p class="back"><a href="/blog" class="c">cd .. ←</a></p>
+    <p class="back"><a href="/blog"><span class="only-human">← Späť na blog</span><span class="only-dev c">cd .. ←</span></a></p>
   </main>
   <Footer />
 </Base>
 <style>
-  article { padding-top: 3rem; }
-  h1 { font-size: clamp(1.75rem, 6vw, 2.5rem); letter-spacing: -0.02em; margin: .5rem 0 2rem; }
-  .prose { font: 1.0625rem/1.75 var(--sans); max-width: 40rem; }
-  .prose :global(h2) { font-family: var(--mono); font-size: 1.25rem; margin: 2.5rem 0 .75rem; }
-  .prose :global(h2)::before { content: '## '; color: var(--accent); }
+  article { padding-top: 4rem; }
+  h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(2.75rem, 9vw, 4.5rem); line-height: 1; letter-spacing: -0.02em; margin: 1rem 0 1.25rem; }
+  :global([data-mode='dev']) h1 { font-family: var(--mono); font-weight: 600; font-size: clamp(1.75rem, 6vw, 2.5rem); line-height: 1.25; }
+  .lede { font-family: var(--serif); font-size: 1.5rem; line-height: 1.3; color: var(--muted); margin: 0 0 3rem; }
+  :global([data-mode='dev']) .lede { font-family: var(--mono); font-size: .9375rem; }
+  :global([data-mode='dev']) .lede::before { content: '// '; color: var(--comment); }
+  .prose { font: 1.125rem/1.75 var(--prose); max-width: 40rem; }
+  .prose :global(h2) { font-family: var(--serif); font-weight: 400; font-size: 2rem; margin: 2.5rem 0 .75rem; }
+  :global([data-mode='dev']) .prose :global(h2) { font-family: var(--mono); font-weight: 600; font-size: 1.25rem; }
+  :global([data-mode='dev']) .prose :global(h2)::before { content: '## '; color: var(--accent); }
   .prose :global(p), .prose :global(ul), .prose :global(ol) { margin: 0 0 1.25rem; }
   .prose :global(a) { color: var(--accent); }
-  .prose :global(blockquote) { margin: 1.5rem 0; padding-left: 1rem; border-left: 2px solid var(--accent); color: var(--muted); }
-  .prose :global(code) { font-family: var(--mono); font-size: .875em; background: var(--line); padding: .1em .35em; border-radius: 4px; }
-  .prose :global(pre) { font-family: var(--mono); font-size: .875rem; background: var(--line); padding: 1rem; overflow-x: auto; border-radius: 6px; }
+  .prose :global(blockquote) { margin: 2rem 0; padding-left: 1.25rem; border-left: 2px solid var(--accent); font-family: var(--serif); font-size: 1.5rem; line-height: 1.3; }
+  :global([data-mode='dev']) .prose :global(blockquote) { font-family: inherit; font-size: inherit; color: var(--muted); }
+  .prose :global(code) { font-family: var(--mono); font-size: .85em; background: var(--soft); padding: .1em .35em; border-radius: 4px; }
+  .prose :global(pre) { font-family: var(--mono); font-size: .875rem; background: var(--soft); border: 1px solid var(--line); padding: 1rem; overflow-x: auto; border-radius: 6px; }
   .prose :global(pre code) { background: none; padding: 0; }
   .prose :global(img) { max-width: 100%; }
   .back { margin: 3rem 0 0; }
+  .back a { text-decoration: none; }
 </style>

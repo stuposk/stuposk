@@ -1,0 +1,22 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Header from './Header.astro';
+import Footer from './Footer.astro';
+import HomeHuman from './HomeHuman.astro';
+import HomeDev from './HomeDev.astro';
+import type { Lang } from '../i18n/ui';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const posts = (await getCollection('blog', (p) => !p.data.draft))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 5);
+---
+<Base>
+  <Header />
+  <main>
+    <HomeHuman lang={lang} posts={posts} />
+    <HomeDev posts={posts} />
+  </main>
+  <Footer />
+</Base>

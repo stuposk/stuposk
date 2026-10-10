@@ -1,0 +1,41 @@
+---
+import { languages, langFromUrl, homeHref, t, type Lang } from '../i18n/ui';
+const lang = langFromUrl(Astro.url);
+const tr = t(lang);
+---
+<div class="switch" role="group">
+  <div class="seg" aria-label={tr('mode.label')} role="group">
+    <button type="button" data-set-mode="human">{tr('mode.human')}</button>
+    <button type="button" data-set-mode="dev">{tr('mode.dev')}</button>
+  </div>
+  <div class="seg" aria-label={tr('lang.label')} role="group">
+    {(Object.keys(languages) as Lang[]).map((l) => (
+      <a href={homeHref(l)} hreflang={l} aria-current={l === lang ? 'true' : undefined}>{languages[l]}</a>
+    ))}
+  </div>
+</div>
+<script is:inline>
+  (function () {
+    var root = document.documentElement;
+    var btns = document.querySelectorAll('[data-set-mode]');
+    function sync() { btns.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.setMode === root.dataset.mode)); }); }
+    btns.forEach(function (b) {
+      b.addEventListener('click', function () {
+        root.dataset.mode = b.dataset.setMode;
+        try { localStorage.setItem('mode', b.dataset.setMode); } catch (e) {}
+        sync();
+      });
+    });
+    sync();
+  })();
+</script>
+<style>
+  .switch { position: fixed; right: 1rem; bottom: 1rem; z-index: 50; display: flex; gap: .5rem; font: 500 .75rem/1 var(--mono); }
+  .seg { display: flex; padding: 3px; border-radius: 999px; background: color-mix(in srgb, var(--bg) 85%, transparent); border: 1px solid var(--line); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); box-shadow: 0 4px 16px rgb(0 0 0 / .08); }
+  :global([data-mode='dev']) .seg { border-radius: 4px; }
+  button, a { all: unset; cursor: pointer; padding: .5rem .7rem; border-radius: 999px; color: var(--muted); transition: background-color .2s, color .2s; }
+  :global([data-mode='dev']) :is(button, a) { border-radius: 2px; }
+  button:hover, a:hover { color: var(--fg); }
+  button[aria-pressed='true'], a[aria-current='true'] { background: var(--fg); color: var(--bg); }
+  button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); }
+</style>

@@ -1,20 +1,26 @@
 ---
+import { langFromUrl, homeHref, t } from '../i18n/ui';
+const lang = langFromUrl(Astro.url);
+const tr = t(lang);
+const home = homeHref(lang);
 ---
 <header class="wrap bar">
-  <a href="/" class="mark" aria-label="Michal Stupák, domov"><img src="/logo.svg" alt="STP" width="36" height="36" /><span>~/michalstupak</span></a>
+  <a href={home} class="mark" aria-label="Michal Stupák"><img src="/logo.svg" alt="STP" width="36" height="36" /><span class="only-dev">~/michalstupak</span><span class="only-human name">Michal Stupák</span></a>
   <nav>
-    <a href="/#projekty">projekty</a>
-    <a href="/#log">log</a>
-    <a href="/blog">blog</a>
-    <a href="/#kontakt">kontakt</a>
+    <a href={`${home}#projekty`}><span class="only-human">{tr('nav.projects')}</span><span class="only-dev">projekty</span></a>
+    <a href={`${home}#cesta`}><span class="only-human">{tr('nav.path')}</span><span class="only-dev">log</span></a>
+    <a href="/blog"><span class="only-human">{tr('nav.blog')}</span><span class="only-dev">blog</span></a>
+    <a href={`${home}#kontakt`}><span class="only-human">{tr('nav.contact')}</span><span class="only-dev">kontakt</span></a>
   </nav>
 </header>
 <style>
-  .bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-top: 1.25rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--line); }
+  .bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-top: 1.25rem; padding-bottom: 1.25rem; }
+  :global([data-mode='dev']) .bar { border-bottom: 1px solid var(--line); }
   .mark { display: flex; align-items: center; gap: .75rem; text-decoration: none; font-weight: 600; }
   .mark img { display: block; outline: 1px solid var(--line); }
+  .name { font-family: var(--serif); font-weight: 400; font-size: 1.25rem; }
   nav { display: flex; gap: 1.25rem; font-size: .875rem; }
   nav a { text-decoration: none; color: var(--muted); }
   nav a:hover { color: var(--accent); }
-  @media (max-width: 34rem) { .mark span { display: none; } nav { gap: .9rem; } }
+  @media (max-width: 34rem) { .mark span { display: none !important; } nav { gap: .9rem; } }
 </style>

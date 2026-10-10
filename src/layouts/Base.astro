@@ -1,19 +1,32 @@
 ---
 import '../styles/global.css';
 import { site } from '../data/site';
+import ModeSwitch from '../components/ModeSwitch.astro';
+import { langFromUrl } from '../i18n/ui';
 interface Props { title?: string; description?: string; }
 const { title, description = `${site.name}. ${site.tagline}` } = Astro.props;
+const lang = langFromUrl(Astro.url);
 const fullTitle = title ? `${title} · ${site.name}` : site.name;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 ---
 <!doctype html>
-<html lang="sk">
+<html lang={lang} data-mode="human">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline>
+      // nastav režim pred vykreslením, nech nebliká
+      (function () {
+        var m = null;
+        try { m = new URLSearchParams(location.search).get('mode') || localStorage.getItem('mode'); } catch (e) {}
+        if (m === 'dev' || m === 'human') document.documentElement.dataset.mode = m;
+      })();
+    </script>
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang="sk" href={new URL('/', Astro.site)} />
+    <link rel="alternate" hreflang="en" href={new URL('/en/', Astro.site)} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="alternate" type="application/rss+xml" title={site.name} href="/rss.xml" />
     <meta property="og:title" content={fullTitle} />
@@ -24,10 +37,11 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=IBM+Plex+Sans:wght@400;600&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
   </head>
   <body>
     <slot />
-    <script is:inline>console.log('%cHello, world.', 'font: 600 20px monospace; color: #1a7f37', '\nKeď už si v DevTools, napíš mi: hello@michalstupak.com');</script>
+    <ModeSwitch />
+    <script is:inline>console.log('%cHello, world.', 'font: 600 20px monospace; color: #1a7f37', '\nKeď už si v DevTools, skús ?mode=dev alebo mi napíš: hello@michalstupak.com');</script>
   </body>
 </html>

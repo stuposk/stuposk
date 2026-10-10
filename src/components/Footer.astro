@@ -1,19 +1,44 @@
 ---
 import { site } from '../data/site';
+import { langFromUrl, t } from '../i18n/ui';
+const tr = t(langFromUrl(Astro.url));
+const year = new Date().getFullYear();
 ---
 <footer id="kontakt" class="wrap foot">
-  <h2 class="cmd">ping <b>{site.email}</b></h2>
-  <p class="mail"><a href={`mailto:${site.email}`}>{site.email}</a></p>
-  <ul>
-    <li><a href={site.links.linkedin} rel="me noopener">linkedin</a></li>
-    <li><a href={site.links.instagram} rel="me noopener">instagram</a></li>
-    <li><a href="/rss.xml">rss</a></li>
-  </ul>
-  <p class="c">// © {new Date().getFullYear()} {site.name} · žiadne cookies, žiadne trackery<br />// <span class="a">exit 0</span></p>
+  <div class="only-human human">
+    <p class="eyebrow">{tr('nav.contact')}</p>
+    <h2>{tr('contact.title')}</h2>
+    <p class="sub">{tr('contact.sub')}</p>
+    <a class="big" href={`mailto:${site.email}`}>{site.email} <span aria-hidden="true">→</span></a>
+    <ul>
+      <li><a href={site.links.linkedin} rel="me noopener">LinkedIn</a></li>
+      <li><a href={site.links.instagram} rel="me noopener">Instagram</a></li>
+      <li><a href="/rss.xml">RSS</a></li>
+    </ul>
+    <p class="eyebrow">© {year} {site.name}</p>
+  </div>
+  <div class="only-dev dev">
+    <h2 class="cmd">ping <b>{site.email}</b></h2>
+    <p class="mail"><a href={`mailto:${site.email}`}>{site.email}</a></p>
+    <ul>
+      <li><a href={site.links.linkedin} rel="me noopener">linkedin</a></li>
+      <li><a href={site.links.instagram} rel="me noopener">instagram</a></li>
+      <li><a href="/rss.xml">rss</a></li>
+    </ul>
+    <p class="c small">// © {year} {site.name} · žiadne cookies, žiadne trackery<br />// <span class="a">exit 0</span></p>
+  </div>
 </footer>
 <style>
-  .foot { padding-top: 4rem; padding-bottom: 3rem; }
+  .foot { padding-top: 6rem; padding-bottom: 6rem; }
+  ul { list-style: none; display: flex; gap: 1.5rem; padding: 0; margin: 0 0 3rem; }
+  .human h2 { font-family: var(--serif); font-weight: 400; font-size: clamp(3.5rem, 13vw, 7rem); line-height: .95; letter-spacing: -0.02em; margin: .75rem 0 1rem; }
+  .human .sub { color: var(--muted); margin: 0 0 2rem; max-width: 36ch; }
+  .big { display: inline-block; font-family: var(--serif); font-size: clamp(1.5rem, 5.5vw, 2.5rem); text-decoration: none; border-bottom: 1px solid var(--fg); margin-bottom: 2rem; word-break: break-word; }
+  .big span { display: inline-block; transition: transform .25s; }
+  .big:hover { border-color: var(--accent); }
+  .big:hover span { transform: translateX(6px); }
+  .dev { padding-top: 0; }
   .mail { font-size: clamp(1.25rem, 5vw, 2rem); font-weight: 600; margin: 0 0 1rem; word-break: break-all; }
-  ul { list-style: none; display: flex; gap: 1.25rem; padding: 0; margin: 0 0 2.5rem; }
-  .c { font-size: .8125rem; }
+  .dev ul { gap: 1.25rem; margin-bottom: 2.5rem; }
+  .small { font-size: .8125rem; }
 </style>
