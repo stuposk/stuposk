@@ -20,6 +20,8 @@ export const expertise = [
 
 export const projects = [
   { name: 'Unite', href: 'https://unite.sk', host: 'unite.sk', text: 'Moja firma. Softvér, AI a digitálne produkty.' },
+  { name: '/kolega', href: 'https://askkolega.com', host: 'askkolega.com', text: 'AI kolega, ktorý pozná vašu firmu. Odpovedá len z vašich dokumentov.' },
+  { name: 'Aether', href: 'https://unite.sk', host: 'unite.sk', text: 'Platforma na nabíjanie elektromobilov a riadenie energie (CPO a EMSP), white-label.' },
   { name: 'INOVIA', href: 'https://inovia.sk', host: 'inovia.sk', text: 'Regionálne inovačné centrum Žilinského kraja. Inovácie a podpora firiem v Turci.' },
   { name: 'cancel', href: 'https://cancel.sk', host: 'cancel.sk', text: 'Coworking a občianske združenie. Komunita ľudí, ktorí niečo budujú.' },
 ];
