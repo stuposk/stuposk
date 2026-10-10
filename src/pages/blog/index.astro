@@ -4,18 +4,19 @@ import Base from '../../layouts/Base.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 
-const fmt = new Intl.DateTimeFormat('sk-SK', { day: 'numeric', month: 'long', year: 'numeric' });
+const fmt = (d: Date) => d.toISOString().slice(0, 10);
 const posts = (await getCollection('blog', (p) => !p.data.draft)).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 ---
 <Base title="Blog" description="Texty o AI, programovaní, podnikaní a komunite.">
   <Header />
   <main class="wrap">
-    <h1>Blog</h1>
+    <p class="cmd">ls -t <b>blog/</b></p>
+    <h1>blog/</h1>
     <ul>
       {posts.map((p) => (
         <li>
           <a href={`/blog/${p.id}`}>
-            <time datetime={p.data.date.toISOString()}>{fmt.format(p.data.date)}</time>
+            <time datetime={p.data.date.toISOString()}>{fmt(p.data.date)}</time>
             <h2>{p.data.title}</h2>
             <p>{p.data.description}</p>
           </a>
@@ -26,11 +27,12 @@ const posts = (await getCollection('blog', (p) => !p.data.draft)).sort((a, b) =>
   <Footer />
 </Base>
 <style>
-  h1 { font-size: clamp(3rem, 12vw, 5.5rem); margin: 2rem 0; }
+  main { padding-top: 3rem; }
+  h1 { font-size: clamp(2rem, 8vw, 3rem); letter-spacing: -0.03em; margin: 0 0 1.5rem; }
   ul { list-style: none; padding: 0; margin: 0; }
-  a { display: block; padding: 1.5rem 0; border-top: 1px solid var(--line); text-decoration: none; }
-  time { font-size: .8125rem; color: var(--muted); }
-  h2 { font-size: 1.9rem; margin: .25rem 0 .5rem; }
+  a { display: block; padding: 1.25rem 0; border-top: 1px dashed var(--line); text-decoration: none; }
+  time { font-size: .8125rem; color: var(--comment); }
+  h2 { font-size: 1.125rem; margin: .25rem 0 .35rem; }
   a:hover h2 { color: var(--accent); }
-  p { margin: 0; color: var(--muted); }
+  p { margin: 0; color: var(--muted); font-size: .875rem; }
 </style>

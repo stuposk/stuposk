@@ -24,9 +24,10 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
   </head>
   <body>
     <slot />
+    <script is:inline>console.log('%cHello, world.', 'font: 600 20px monospace; color: #1a7f37', '\nKeď už si v DevTools, napíš mi: hello@michalstupak.com');</script>
   </body>
 </html>

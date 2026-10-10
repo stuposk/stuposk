@@ -5,60 +5,72 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { site, expertise, projects, timeline } from '../data/site';
 
-const fmt = new Intl.DateTimeFormat('sk-SK', { day: 'numeric', month: 'long', year: 'numeric' });
+// krátky „commit hash“ odvodený z textu, aby sa nemenil medzi buildmi
+const hash = (s: string) => {
+  let h = 5381;
+  for (const ch of s) h = ((h << 5) + h + ch.charCodeAt(0)) >>> 0;
+  return h.toString(16).padStart(7, '0').slice(0, 7);
+};
+const fmt = (d: Date) => d.toISOString().slice(0, 10);
 const posts = (await getCollection('blog', (p) => !p.data.draft))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
-  .slice(0, 3);
+  .slice(0, 5);
+const log = [...timeline].reverse();
 ---
 <Base>
   <Header />
   <main class="wrap">
     <section class="hero">
-      <p class="label">Martin · Slovensko</p>
-      <h1>{site.name}<span class="dot">.</span></h1>
-      <p class="lead">{site.tagline}</p>
-      <p class="intro">{site.intro}</p>
+      <p class="cmd">./hello</p>
+      <h1>Hello, world.<span class="cursor" aria-hidden="true">_</span></h1>
+      <p class="who">Som <b>{site.name}</b> <span class="c">(aka {site.handle})</span>. {site.tagline}</p>
+      {site.intro.map((line) => <p class="c">// {line}</p>)}
     </section>
 
     <section>
-      <div class="sec-head"><h2>Čo robím</h2><span class="label">Odbornosti</span></div>
-      <ol class="exp">
-        {expertise.map((e, i) => (
-          <li><span class="n">0{i + 1}</span><div><h3>{e.title}</h3><p>{e.text}</p></div></li>
-        ))}
-      </ol>
+      <h2 class="cmd">cat <b>skills.json</b></h2>
+      <pre class="json"><code>{'{\n'}{expertise.map((e, i) => (
+<Fragment>  <span class="a">"{e.title}"</span>: <span class="s">"{e.text}"</span>{i < expertise.length - 1 ? ',' : ''}{'\n'}</Fragment>
+))}{'}'}</code></pre>
     </section>
 
     <section id="projekty">
-      <div class="sec-head"><h2>Projekty</h2><span class="label">Kde ma nájdeš</span></div>
+      <h2 class="cmd">ls <b>~/projects</b></h2>
       <ul class="proj">
         {projects.map((p) => (
-          <li><a href={p.href} target="_blank" rel="noopener"><span class="pn">{p.name}</span><span class="pt">{p.text}</span><span class="arrow" aria-hidden="true">↗</span></a></li>
+          <li>
+            <a href={p.href} target="_blank" rel="noopener">
+              <span class="pn">{p.name}/</span>
+              <span class="pt">{p.text}</span>
+              <span class="ph c">{p.host} ↗</span>
+            </a>
+          </li>
         ))}
       </ul>
     </section>
 
-    <section id="cesta">
-      <div class="sec-head"><h2>Cesta</h2><span class="label">Život a projekty</span></div>
-      <ol class="tl">
-        {timeline.map((t) => (
+    <section id="log">
+      <h2 class="cmd">git log <b>--oneline</b></h2>
+      <ol class="log">
+        {log.map((t, i) => (
           <li class={t.kind}>
-            <span class="year">{t.year}</span>
-            <div><h3>{t.title}</h3><p>{t.text}</p></div>
+            <span class="hash">{t.year === 'HEAD' ? 'HEAD' : hash(t.year + t.title)}</span>
+            <span class="year c">{t.year === 'HEAD' ? 'now' : t.year}</span>
+            <div><span class="msg">{t.title}</span>{i === 0 && <span class="ref"> (HEAD -&gt; main)</span>}<p class="c">{t.text}</p></div>
           </li>
         ))}
       </ol>
-      <p class="legend label"><span class="k project"></span> projekty <span class="k life"></span> život</p>
     </section>
 
     {posts.length > 0 && (
       <section>
-        <div class="sec-head"><h2>Blog</h2><a class="label" href="/blog">Všetky články →</a></div>
+        <h2 class="cmd">ls -t <b>blog/</b></h2>
         <ul class="posts">
           {posts.map((p) => (
-            <li><a href={`/blog/${p.id}`}><time datetime={p.data.date.toISOString()}>{fmt.format(p.data.date)}</time><span>{p.data.title}</span></a></li>
+            <li><a href={`/blog/${p.id}`}><time class="c" datetime={p.data.date.toISOString()}>{fmt(p.data.date)}</time><span>{p.data.title}</span></a></li>
           ))}
         </ul>
+        <p><a href="/blog" class="c">cd blog/ →</a></p>
       </section>
     )}
   </main>
@@ -66,36 +78,32 @@ const posts = (await getCollection('blog', (p) => !p.data.draft))
 </Base>
 
 <style>
-  .hero { padding-top: 3.5rem; }
-  h1 { font-size: clamp(3.5rem, 15vw, 7.5rem); margin: .5rem 0 1.5rem; }
-  .dot { color: var(--accent); }
-  .lead { font-family: var(--serif); font-size: clamp(1.5rem, 4.5vw, 2.25rem); line-height: 1.2; margin: 0 0 1.25rem; max-width: 30ch; }
-  .intro { color: var(--muted); max-width: 52ch; margin: 0; }
+  .hero { padding-top: 4.5rem; }
+  h1 { font-size: clamp(2.25rem, 9vw, 4rem); letter-spacing: -0.03em; margin: 0 0 1.5rem; }
+  .cursor { color: var(--accent); animation: blink 1.1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .cursor { animation: none; } }
+  .who { font-size: 1.0625rem; margin: 0 0 .75rem; }
+  .hero .c { margin: 0; }
 
-  .exp, .proj, .tl, .posts { list-style: none; padding: 0; margin: 0; }
-  .exp li { display: grid; grid-template-columns: 3rem 1fr; padding: 1.25rem 0; border-bottom: 1px solid var(--line); }
-  .exp .n { color: var(--accent); font-size: .875rem; padding-top: .45rem; }
-  .exp h3, .tl h3 { font-size: 1.5rem; }
-  .exp p, .tl p { margin: .25rem 0 0; color: var(--muted); }
+  .json { margin: 0; padding: 1.25rem; background: color-mix(in srgb, var(--line) 45%, transparent); border: 1px solid var(--line); border-radius: 6px; overflow-x: auto; font: inherit; font-size: .875rem; line-height: 1.8; white-space: pre-wrap; }
 
-  .proj a { display: grid; grid-template-columns: 7rem 1fr auto; gap: 1rem; align-items: baseline; padding: 1.25rem 0; border-bottom: 1px solid var(--line); text-decoration: none; }
-  .pn { font-family: var(--serif); font-size: 1.75rem; }
+  ul, ol { list-style: none; padding: 0; margin: 0; }
+  .proj a { display: grid; grid-template-columns: 8rem 1fr auto; gap: 1rem; padding: .9rem 0; border-bottom: 1px dashed var(--line); text-decoration: none; }
+  .pn { font-weight: 600; color: var(--accent); }
   .pt { color: var(--muted); }
-  .arrow { transition: transform .2s; }
-  .proj a:hover .arrow { transform: translate(3px, -3px); }
-  @media (max-width: 32rem) { .proj a { grid-template-columns: 1fr auto; } .pt { grid-column: 1 / -1; grid-row: 2; } }
+  .ph { font-size: .8125rem; white-space: nowrap; }
+  .proj a:hover .pt { color: var(--fg); }
+  @media (max-width: 38rem) { .proj a { grid-template-columns: 1fr auto; gap: .25rem 1rem; } .pt { grid-column: 1 / -1; grid-row: 2; } }
 
-  .tl { position: relative; border-left: 1px solid var(--line); margin-left: .35rem; }
-  .tl li { position: relative; display: grid; grid-template-columns: 5rem 1fr; padding: 0 0 2rem 1.75rem; }
-  .tl li::before { content: ''; position: absolute; left: -.3rem; top: .6rem; width: .6rem; height: .6rem; border-radius: 50%; background: var(--paper); border: 1.5px solid var(--muted); }
-  .tl li.project::before { background: var(--accent); border-color: var(--accent); }
-  .year { font-size: .875rem; color: var(--muted); padding-top: .5rem; }
-  .legend { display: flex; align-items: center; gap: .5rem; margin-top: .5rem; }
-  .k { width: .6rem; height: .6rem; border-radius: 50%; border: 1.5px solid var(--muted); display: inline-block; margin-left: .75rem; }
-  .k.project { background: var(--accent); border-color: var(--accent); margin-left: 0; }
+  .log li { display: grid; grid-template-columns: 4.5rem 3.5rem 1fr; gap: .75rem; padding: .5rem 0; }
+  .hash { color: var(--string); }
+  .msg { font-weight: 600; }
+  .ref { color: var(--accent); font-size: .8125rem; }
+  .log p { margin: .1rem 0 0; font-size: .875rem; }
+  @media (max-width: 34rem) { .log li { grid-template-columns: 4.5rem 1fr; } .log .year { display: none; } }
 
-  .posts a { display: flex; gap: 1.5rem; padding: 1rem 0; border-bottom: 1px solid var(--line); text-decoration: none; }
-  .posts time { color: var(--muted); font-size: .875rem; min-width: 9rem; padding-top: .2rem; }
-  .posts span { font-family: var(--serif); font-size: 1.4rem; }
-  @media (max-width: 32rem) { .posts a { flex-direction: column; gap: .25rem; } }
+  .posts a { display: flex; gap: 1.25rem; padding: .6rem 0; text-decoration: none; }
+  .posts a:hover span { color: var(--accent); }
+  @media (max-width: 34rem) { .posts a { flex-direction: column; gap: 0; } }
 </style>

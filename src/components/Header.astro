@@ -1,18 +1,20 @@
 ---
 ---
 <header class="wrap bar">
-  <a href="/" class="mark" aria-label="Michal Stupák, domov"><img src="/logo.svg" alt="STP" width="40" height="40" /></a>
+  <a href="/" class="mark" aria-label="Michal Stupák, domov"><img src="/logo.svg" alt="STP" width="36" height="36" /><span>~/michalstupak</span></a>
   <nav>
-    <a href="/#projekty">Projekty</a>
-    <a href="/#cesta">Cesta</a>
-    <a href="/blog">Blog</a>
-    <a href="/#kontakt">Kontakt</a>
+    <a href="/#projekty">projekty</a>
+    <a href="/#log">log</a>
+    <a href="/blog">blog</a>
+    <a href="/#kontakt">kontakt</a>
   </nav>
 </header>
 <style>
-  .bar { display: flex; align-items: center; justify-content: space-between; padding-top: 1.5rem; padding-bottom: 1.5rem; }
-  .mark img { display: block; }
-  nav { display: flex; gap: 1.5rem; font-size: .9375rem; }
-  nav a { text-decoration: none; }
-  @media (max-width: 30rem) { nav { gap: 1rem; font-size: .875rem; } }
+  .bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-top: 1.25rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--line); }
+  .mark { display: flex; align-items: center; gap: .75rem; text-decoration: none; font-weight: 600; }
+  .mark img { display: block; outline: 1px solid var(--line); }
+  nav { display: flex; gap: 1.25rem; font-size: .875rem; }
+  nav a { text-decoration: none; color: var(--muted); }
+  nav a:hover { color: var(--accent); }
+  @media (max-width: 34rem) { .mark span { display: none; } nav { gap: .9rem; } }
 </style>
